@@ -8,13 +8,13 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         // Return your bot username here
-        return "YourBotUsername";
+        return "test5681bot";
     }
 
     @Override
     public String getBotToken() {
         // Return your bot token from BotFather
-        return "YOUR_BOT_TOKEN";
+        return "xdd";
     }
 
     @Override
@@ -28,7 +28,15 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             // Create a SendMessage object with the received chat ID and message text
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
-            message.setText("You said: " + messageText);
+            String reveres = "";
+            char[] reversedMessageArray = messageText.toCharArray();
+
+            for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
+                reveres = reveres + reversedMessageArray[i];
+            }
+            System.out.println(reveres);
+
+            message.setText(reveres);
 
             // Send the message back to the user
             try {
