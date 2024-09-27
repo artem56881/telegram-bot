@@ -1,3 +1,5 @@
+package org.example;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,8 +16,21 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         // Return your bot token from BotFather
-        return "xdd";
+        return "";
     }
+
+
+    private String reverse(String message){
+        String reveres = "";
+        char[] reversedMessageArray = message.toCharArray();
+
+        for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
+            reveres = reveres + reversedMessageArray[i];
+        }
+        System.out.println(reveres);
+        return reveres;
+    }
+
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -27,16 +42,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
             // Create a SendMessage object with the received chat ID and message text
             SendMessage message = new SendMessage();
+            String reversedString = reverse(messageText);
             message.setChatId(chatId.toString());
-            String reveres = "";
-            char[] reversedMessageArray = messageText.toCharArray();
-
-            for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
-                reveres = reveres + reversedMessageArray[i];
-            }
-            System.out.println(reveres);
-
-            message.setText(reveres);
+            message.setText(reversedString);
 
             // Send the message back to the user
             try {
