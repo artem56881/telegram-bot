@@ -4,19 +4,27 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.TelegramBot;
 
 public class MyTelegramBot extends TelegramLongPollingBot {
+    private String token;
+    private String name;
+
+    public MyTelegramBot(String token, String name) {
+        this.name = name;
+        this.token = token;
+    }
 
     @Override
     public String getBotUsername() {
         // Return your bot username here
-        return "test5681bot";
+        return name;
     }
 
     @Override
     public String getBotToken() {
         // Return your bot token from BotFather
-        return "";
+        return token;
     }
 
 

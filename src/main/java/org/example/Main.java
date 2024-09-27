@@ -8,9 +8,12 @@ public class
 
 Main {
     public static void main(String[] args) {
+        String token = System.getenv("TOKEN");
+        String name = System.getenv("NAME");
+
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new MyTelegramBot());
+            botsApi.registerBot(new MyTelegramBot(token, name));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
