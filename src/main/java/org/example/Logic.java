@@ -15,6 +15,13 @@ public class Logic {
         return reveres.toString();
     }
     public String processMessage(String inputMessage){
+        if (Objects.equals(inputMessage, "/option1")){
+            return ":D";
+        }
+        if (Objects.equals(inputMessage, "/option2")){
+            return ":DDDD";
+        }
+
         if (Objects.equals(inputMessage, "/start")){
             return "Hello";
         }
