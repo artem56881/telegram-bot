@@ -11,9 +11,11 @@ Main {
         String token = System.getenv("TOKEN");
         String name = System.getenv("NAME");
 
+        Logic logic = new Logic();
+
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new MyTelegramBot(token, name));
+            botsApi.registerBot(new MyTelegramBot(token, name, logic));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
