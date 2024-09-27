@@ -4,15 +4,17 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.generics.TelegramBot;
 
 public class MyTelegramBot extends TelegramLongPollingBot {
-    private String token;
-    private String name;
+    private final String token;
+    private final String name;
+    private final Logic logic;
 
-    public MyTelegramBot(String token, String name) {
+    public MyTelegramBot(String token, String name, Logic logic) {
         this.name = name;
         this.token = token;
+        this.logic = logic;
+
     }
 
     @Override
@@ -28,18 +30,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
-    private String reverse(String message){
-        String reveres = "";
-        char[] reversedMessageArray = message.toCharArray();
-
-        for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
-            reveres = reveres + reversedMessageArray[i];
-        }
-        System.out.println(reveres);
-        return reveres;
-    }
-
-
     @Override
     public void onUpdateReceived(Update update) {
         // Check if the update has a message and the message has text
@@ -50,9 +40,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
             // Create a SendMessage object with the received chat ID and message text
             SendMessage message = new SendMessage();
-            String reversedString = reverse(messageText);
             message.setChatId(chatId.toString());
-            message.setText(reversedString);
+
+            String outputMessage = logic.processMessage(messageText);
+            message.setText(outputMessage);
+
 
             // Send the message back to the user
             try {
@@ -62,4 +54,5 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             }
         }
     }
+
 }
