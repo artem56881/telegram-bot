@@ -6,6 +6,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 //import json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -30,7 +32,7 @@ public class Logic {
         Request request = new Request.Builder()
                 .url(itemLink)
                 .get()
-                .addHeader("x-rapidapi-key", "xxx")
+                .addHeader("x-rapidapi-key", System.getenv("ALITOKEN"))
                 .addHeader("x-rapidapi-host", "aliexpress-datahub.p.rapidapi.com")
                 .build();
         System.out.println(itemLink);
@@ -48,36 +50,59 @@ public class Logic {
             return "Request failed: " + e.getMessage(); // Handle failure
         }
     }
-/*  Не видит объект JSONObject хзхз
-    public String extractPrice(String jsonResponse) {
-        JSONObject jsonObject = new JSONObject(jsonResponse);
-        // Navigate to the price using the keys from the JSON structure
-        double price = jsonObject
-                .getJSONObject("result")
-                .getJSONObject("item")
-                .getJSONObject("sku")
-                .getJSONObject("def")
-                .getDouble("price");
 
-        return "Price: $" + price;
+    public String checkForJsonDataError(String jsonResponse) {
+        // Parse the JSON string
+        JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+
+        // Navigate through the JSON to extract the promotion price
+        String errorCode;
+        errorCode = jsonObject
+        .getAsJsonObject("result")
+        .getAsJsonObject("status")
+        .get("data")
+        .getAsString();
+
+        return errorCode;
     }
 
-*/
-    public String processMessage(String inputMessage){
-        //if (Objects.equals(inputMessage, "ali")){
 
-            return ApiResponse(inputMessage);
-        //}
-        /*
-        if (Objects.equals(inputMessage, "/option2")){
+    public String extractPromotionPrice(String jsonResponse) {
+        // Parse the JSON string
+        JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
+
+        // Navigate through the JSON to extract the promotion price
+        double promotionPrice = jsonObject
+                .getAsJsonObject("result")
+                .getAsJsonObject("item")
+                .getAsJsonObject("sku")
+                .getAsJsonObject("def")
+                .get("promotionPrice")
+                .getAsDouble();
+
+        return "Promotion Price: $" + promotionPrice;
+    }
+
+    public String processMessage(String inputMessage){
+        if (Objects.equals(inputMessage, "tst")){
             return ":DDDD";
         }
 
-        if (Objects.equals(inputMessage, "/start")){
-            return "Hello";
+        String response = ApiResponse(inputMessage);
+        System.out.println(response);
+
+        String errorCode = checkForJsonDataError(response);
+        System.out.println(errorCode);
+
+        if(errorCode.equals("error")){
+            return "error";
         }
-        */
-        //return reverse(inputMessage);
+
+        String price = extractPromotionPrice(response);
+        System.out.println(price);
+
+        return errorCode + ": " + price;
+
 
     }
 
