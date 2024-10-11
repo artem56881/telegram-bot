@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+
 public class DatabaseConnection {
     private static final String URL = "jdbc:postgresql://localhost:5432/TelegramBot";
     private static final String USER = "postgres";
@@ -24,20 +25,41 @@ public class DatabaseConnection {
         return connection;
     }
 
-    public void createUsersTable() {
-        String sql = "CREATE TABLE IF NOT EXISTS Users ("
-                + "id SERIAL PRIMARY KEY, "
-                + "username VARCHAR(50) NOT NULL, "
-                + "email VARCHAR(50) NOT NULL UNIQUE"
-                + ");";
+    public void createAllTable() {
+    String sql1 = """
+            CREATE TABLE IF NOT EXISTS Users (
+            id SERIAL PRIMARY KEY, 
+            username VARCHAR(50) NOT NULL 
+            );""";
 
-        try (Connection conn = connect(); // Используем метод connect для получения соединения
-             Statement stmt = conn.createStatement()) {
+    String sql2 = """
+            CREATE TABLE IF NOT EXISTS Products (
+            id SERIAL PRIMARY KEY, 
+            name VARCHAR(50) NOT NULL, 
+            price INTEGER NOT NULL
+            );""";
 
-            stmt.executeUpdate(sql);
-            System.out.println("Таблица Users успешно создана.");
-        } catch (SQLException e) {
-            System.out.println("Ошибка создания таблицы: " + e.getMessage());
+    String sql3 = """
+            CREATE TABLE IF NOT EXISTS Users_Products (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            product_id INTEGER NOT NULL
+            );""";
+
+    try {
+        Connection conn = connect();
+        if (conn != null) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.executeUpdate(sql1);
+                stmt.executeUpdate(sql2);
+                stmt.executeUpdate(sql3);
+                System.out.println("Таблица Users успешно создана.");
+            }
+        } else {
+            System.out.println("Не удалось создать таблицу: соединение с базой данных не установлено.");
         }
+    } catch (SQLException e) {
+        System.out.println("Ошибка создания таблицы: " + e.getMessage());
     }
+}
 }
