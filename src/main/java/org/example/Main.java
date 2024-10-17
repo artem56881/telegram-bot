@@ -7,6 +7,8 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 public class Main {
     public static void main(String[] args) {
+
+
         String token = System.getenv("TOKEN");
         String name = System.getenv("NAME");
         String alitoken = System.getenv("ALITOKEN");

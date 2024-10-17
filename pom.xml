@@ -37,7 +37,12 @@
             <version>20240303</version>
         </dependency>
 
-
+        <dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>runtime</scope>
+            <version>42.7.4</version>
+		</dependency>
 
         <!-- https://mvnrepository.com/artifact/tangrammer/java-net-http-client -->
         <dependency>
