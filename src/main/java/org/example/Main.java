@@ -1,6 +1,6 @@
 package org.example;
 
-import org.example.config.DatabaseConnection;
+import org.example.Config.DatabaseConnection;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
