@@ -10,10 +10,41 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.util.Objects;
-
+import java.util.HashMap;
 
 public class Logic {
+
+    private final HashMap<String, String> commandMap = new HashMap<>();
+
+
+    public Logic(){
+
+        commandMap.put("/start", """
+                Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
+
+                Команды:
+                /add - добавить товар для отслеживания
+                /list - показать список отслеживаемых товаров
+                /remove - удалить товар из списка отслеживания
+                /help - помощь""");
+
+        commandMap.put("/add", "Введите ID товара для добавления в список отслеживания.");
+
+        commandMap.put("/list", "Список отслеживаемых товаров:");
+
+        commandMap.put("/remove", "Введите ID товара для удаления из списка отслеживания.");
+
+        commandMap.put("/help", """
+                Список доступных команд:
+                /start - начать работу бота
+                /add - добавить товар для отслеживания
+                /list - показать список отслеживаемых товаров
+                /remove - удалить товар из списка отслеживания
+                /help - помощь""");
+
+        commandMap.put("/tst", ":DDDD");
+    }
+
     public String reverse(String message){
         StringBuilder reveres = new StringBuilder();
         char[] reversedMessageArray = message.toCharArray();
@@ -83,9 +114,11 @@ public class Logic {
         return "Promotion Price: $" + promotionPrice;
     }
 
+
     public String processMessage(String inputMessage){
-        if (Objects.equals(inputMessage, "tst")){
-            return ":DDDD";
+
+        if (commandMap.containsKey(inputMessage)) {
+            return commandMap.get(inputMessage);
         }
 
         String response = ApiResponse(inputMessage);
@@ -102,7 +135,6 @@ public class Logic {
         System.out.println(price);
 
         return errorCode + ": " + price;
-
 
     }
 
