@@ -72,13 +72,13 @@ public class Logic {
         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
 
         // Navigate through the JSON to extract the promotion price
-        double promotionPrice = jsonObject
+        String promotionPrice = jsonObject
                 .getAsJsonObject("result")
                 .getAsJsonObject("item")
                 .getAsJsonObject("sku")
                 .getAsJsonObject("def")
                 .get("promotionPrice")
-                .getAsDouble();
+                .getAsString();
 
         return "Promotion Price: $" + promotionPrice;
     }
