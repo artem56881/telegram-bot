@@ -8,6 +8,8 @@ import okhttp3.Response;
 //import json.JSONObject;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.example.Commands.AddCommand;
+import org.example.Commands.RemoveCommand;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -99,10 +101,8 @@ public class Logic {
 
 
     public String extractPromotionPrice(String jsonResponse) {
-        // Parse the JSON string
         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
 
-        // Navigate through the JSON to extract the promotion price
         String promotionPrice = jsonObject
                 .getAsJsonObject("result")
                 .getAsJsonObject("item")
@@ -120,6 +120,8 @@ public class Logic {
         if (commandMap.containsKey(inputMessage)) {
             return commandMap.get(inputMessage);
         }
+
+
 
         String response = ApiResponse(inputMessage);
         System.out.println(response);
