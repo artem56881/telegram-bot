@@ -1,15 +1,12 @@
 package org.example;
 
-
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-//import json.JSONObject;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.example.Commands.AddCommand;
-import org.example.Commands.RemoveCommand;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,7 +16,7 @@ public class Logic {
     private final HashMap<String, String> commandMap = new HashMap<>();
 
 
-    public Logic(){
+    public Logic() {
 
         commandMap.put("/start", """
                 Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
@@ -47,7 +44,7 @@ public class Logic {
         commandMap.put("/tst", ":DDDD");
     }
 
-    public String reverse(String message){
+    public String reverse(String message) {
         StringBuilder reveres = new StringBuilder();
         char[] reversedMessageArray = message.toCharArray();
 
@@ -91,10 +88,10 @@ public class Logic {
         // Navigate through the JSON to extract the promotion price
         String errorCode;
         errorCode = jsonObject
-        .getAsJsonObject("result")
-        .getAsJsonObject("status")
-        .get("data")
-        .getAsString();
+                .getAsJsonObject("result")
+                .getAsJsonObject("status")
+                .get("data")
+                .getAsString();
 
         return errorCode;
     }
@@ -115,29 +112,41 @@ public class Logic {
     }
 
 
-    public String processMessage(String inputMessage){
+    public String processMessage(String inputMessage) {
 
-        if (commandMap.containsKey(inputMessage)) {
-            return commandMap.get(inputMessage);
+
+        if (inputMessage != null) {
+            switch (inputMessage) {
+                case "/start":
+                    return commandMap.get("/start");
+                case "/add":
+                    //Тут будет вызван метод, который из ссылки на товар достает его ID и добавляет в базу данных
+                    return commandMap.get("/add");
+                case "/list":
+                    return commandMap.get("/list");
+                case "/remove":
+                    return commandMap.get("/remove");
+                case "/help":
+                    return commandMap.get("/help");
+                default:
+                    return "Команда введена не верно";
+            }
+
+        }else{
+            String response = ApiResponse(inputMessage);
+            System.out.println(response);
+
+            String errorCode = checkForJsonDataError(response);
+            System.out.println(errorCode);
+
+            if (errorCode.equals("error")) {
+                return "error";
+            }
+
+            String price = extractPromotionPrice(response);
+            System.out.println(price);
+
+            return errorCode + ": " + price;
         }
-
-
-
-        String response = ApiResponse(inputMessage);
-        System.out.println(response);
-
-        String errorCode = checkForJsonDataError(response);
-        System.out.println(errorCode);
-
-        if(errorCode.equals("error")){
-            return "error";
-        }
-
-        String price = extractPromotionPrice(response);
-        System.out.println(price);
-
-        return errorCode + ": " + price;
-
     }
-
 }
