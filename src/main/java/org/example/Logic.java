@@ -7,11 +7,16 @@ import okhttp3.Response;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.example.Commands.AddCommand;
+import org.example.Config.DatabaseConnection;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class Logic {
+    
 
     private final HashMap<String, String> commandMap = new HashMap<>();
 
@@ -111,28 +116,33 @@ public class Logic {
         return "Promotion Price: $" + promotionPrice;
     }
 
-
-    public String processMessage(String inputMessage) {
-
-
+    public String processMessage(String inputMessage, int userId, String userName) {
         if (inputMessage != null) {
             switch (inputMessage) {
                 case "/start":
-                    return commandMap.get("/start");
+                    // Вызываем метод для добавления пользователя в базу данных
+                    String result = addUserToDatabase(userId, userName);
+                    return result;
+
                 case "/add":
-                    //Тут будет вызван метод, который из ссылки на товар достает его ID и добавляет в базу данных
+                    // Логика для добавления товара
                     return commandMap.get("/add");
+
                 case "/list":
+                    // Логика для вывода списка товаров
                     return commandMap.get("/list");
+
                 case "/remove":
+                    // Логика для удаления товара
                     return commandMap.get("/remove");
+
                 case "/help":
+                    // Логика для помощи
                     return commandMap.get("/help");
                 default:
                     return "Команда введена не верно";
             }
-
-        }else{
+        } else {
             String response = ApiResponse(inputMessage);
             System.out.println(response);
 
@@ -148,5 +158,26 @@ public class Logic {
 
             return errorCode + ": " + price;
         }
+    }
+
+
+
+    public String addUserToDatabase(int userId, String userName) {
+        // Вызов метода для добавления пользователя в базу данных
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+        String sql = "INSERT INTO users (id, name) VALUES (?, ?)";
+
+        try (Connection connection = databaseConnection.connect();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setInt(1, userId);
+            preparedStatement.setString(2, userName);
+            preparedStatement.executeUpdate();
+
+            return "Пользователь " + userName + " успешно добавлен в базу данных.";
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
