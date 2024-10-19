@@ -4,14 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
-import org.example.Config.DatabaseConnection; // Подключение к базе данных (добавь этот класс)
+import org.example.Config.DatabaseConnection;
+
 
 public class AddCommand {
     private HashMap<String, String> trackedProducts;
 
     private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (id, name, price) VALUES (?, ?, ?)";
 
-    public AddCommand(HashMap<String, String> trackedProducts) {
+    public AddCommand() {
         this.trackedProducts = trackedProducts;
     }
 
@@ -49,4 +50,5 @@ public class AddCommand {
             throw new SQLException("Ошибка при добавлении товара в БД: " + e.getMessage());
         }
     }
+
 }
