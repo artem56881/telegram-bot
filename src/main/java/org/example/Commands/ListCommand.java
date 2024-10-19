@@ -5,45 +5,57 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.example.Config.DatabaseConnection;
 
+
 public class ListCommand {
-    private static final String QUERY = """
-        SELECT p.name, p.price FROM Products p
-        JOIN Users_Products up ON p.id = up.product_id
-        WHERE up.user_id = ?;
-    """;
+    private HashMap<String, String> trackedProducts;
 
-    public String execute(int userId) {
-        List<String> productList = new ArrayList<>();
+    // SQL-запрос для получения всех товаров из базы данных
+    private static final String SELECT_ALL_PRODUCTS_SQL = "SELECT id, name, price FROM products";
 
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement preparedStatement = connection.prepareStatement(QUERY)) {
+    public ListCommand(HashMap<String, String> trackedProducts) {
+        this.trackedProducts = trackedProducts;
+    }
 
-            // Устанавливаем userId как параметр для SQL-запроса
-            preparedStatement.setInt(1, userId);
+    public String execute() {
+        List<String> productsList = new ArrayList<>();
 
-            // Выполняем запрос и получаем результат
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            // Обрабатываем результат запроса, добавляем товары в список
-            while (resultSet.next()) {
-                String productName = resultSet.getString("name");
-                int productPrice = resultSet.getInt("price");
-                productList.add(productName + " - $" + productPrice);
+        try {
+            productsList = getAllProductsFromDatabase();
+            if (productsList.isEmpty()) {
+                return "Нет товаров для отслеживания.";
+            } else {
+                return String.join("\n", productsList);  // Возвращаем список товаров как строку
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return "Ошибка при получении списка товаров: " + e.getMessage();
+            return "Ошибка при получении списка товаров из базы данных: " + e.getMessage();
         }
+    }
 
-        // Если список товаров пуст, возвращаем соответствующее сообщение
-        if (productList.isEmpty()) {
-            return "Вы не подписаны ни на один товар.";
+    private List<String> getAllProductsFromDatabase() throws SQLException {
+        List<String> products = new ArrayList<>();
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCTS_SQL)) {
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                String productId = resultSet.getString("id");
+                String productName = resultSet.getString("name");
+                double productPrice = resultSet.getDouble("price");
+
+                // Добавляем продукт в список
+                products.add("ID: " + productId + ", Название: " + productName + ", Цена: " + productPrice);
+            }
+        } catch (SQLException e) {
+            throw new SQLException("Ошибка при получении списка товаров из БД: " + e.getMessage());
         }
-
-        // Возвращаем список товаров в виде строки
-        return "Список отслеживаемых товаров:\n" + String.join("\n", productList);
+        return products;
     }
 }
