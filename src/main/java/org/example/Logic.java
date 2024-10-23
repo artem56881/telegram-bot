@@ -1,6 +1,7 @@
 package org.example;
 
 
+import com.google.gson.JsonObject;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -11,6 +12,7 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.HashMap;
+
 
 public class Logic {
 
@@ -121,7 +123,14 @@ public class Logic {
             return commandMap.get(inputMessage);
         }
 
-        String response = ApiResponse(inputMessage);
+        String itemId = "";
+        try {//теперь бот принимет ссылку и выделаяет из нее id
+            itemId = LinkToId.extractItemId(inputMessage);
+            System.out.println(itemId);
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        };
+        String response = ApiResponse(itemId);
         System.out.println(response);
 
         String errorCode = checkForJsonDataError(response);
@@ -135,6 +144,7 @@ public class Logic {
         System.out.println(price);
 
         return errorCode + ": " + price;
+
 
     }
 
