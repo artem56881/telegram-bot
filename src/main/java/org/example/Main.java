@@ -28,7 +28,6 @@ public class Main {
 
         DatabaseConnection databaseConnection = new DatabaseConnection();
         databaseConnection.createAllTable();
-
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new MyTelegramBot(token, name, logic));
