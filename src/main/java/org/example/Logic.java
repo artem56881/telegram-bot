@@ -73,31 +73,29 @@ public class Logic {
 
 
     public String ApiResponse(String itemId) {
-    OkHttpClient client = new OkHttpClient();
-    String itemLink = "https://api.ozon.ru/v2/product/info" + itemId; // Пример конечной точки, замените на фактическую конечную точку Ozon
-    Request request = new Request.Builder()
-            .url(itemLink)
-            .get()
-            .addHeader("Authorization", "Bearer d22b8349-aa28-4796-a2a8-b728ba6a39a3") // Замените на свой ключ API Ozon
-            .build();
-    System.out.println(itemLink);
-    try {
-        Call call = client.newCall(request);
-        Response response = call.execute();
+        OkHttpClient client = new OkHttpClient();
+        String itemLink = "https://aliexpress-datahub.p.rapidapi.com/item_detail_2?itemId=" + itemId;
+        Request request = new Request.Builder()
+                .url(itemLink)
+                .get()
+                .addHeader("x-rapidapi-key", System.getenv("ALITOKEN"))
+                .addHeader("x-rapidapi-host", "aliexpress-datahub.p.rapidapi.com")
+                .build();
+        System.out.println(itemLink);
+        try {
+            Call call = client.newCall(request);
+            Response response = call.execute(); // Blocking call, may throw IOException
 
-        if (response.isSuccessful()) {
-            String jsonResponse = response.body().string();
-            JSONObject jsonObject = new JSONObject(jsonResponse);
-            String productName = jsonObject.getString("name"); 
-            return "Название товара: " + productName;
-        } else {
-            return "Ошибка: " + response.code();
+            if (response.isSuccessful()) {
+                return response.body().string(); // Return the body as a string
+            } else {
+                return "Error: " + response.code(); // Handle error responses
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Request failed: " + e.getMessage(); // Handle failure
         }
-    } catch (IOException | JSONException e) {
-        e.printStackTrace();
-        return "Запрос не удался: " + e.getMessage();
     }
-}
 
 
     public String checkForJsonDataError(String jsonResponse) {
