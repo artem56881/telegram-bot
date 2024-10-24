@@ -6,8 +6,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.example.Commands.AddCommand;
 import org.example.Config.DatabaseConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -32,7 +33,7 @@ public class Logic {
                 /remove - удалить товар из списка отслеживания
                 /help - помощь""");
 
-        commandMap.put("/add", "Введите ID товара для добавления в список отслеживания.");
+        commandMap.put("/add", "Введите ссылку на товар для добавления в список отслеживания.");
 
         commandMap.put("/list", "Список отслеживаемых товаров:");
 
@@ -61,30 +62,43 @@ public class Logic {
     }
 
 
-    public String ApiResponse(String itemId) {
-        OkHttpClient client = new OkHttpClient();
-        String itemLink = "https://aliexpress-datahub.p.rapidapi.com/item_detail_2?itemId=" + itemId;
-        Request request = new Request.Builder()
-                .url(itemLink)
-                .get()
-                .addHeader("x-rapidapi-key", System.getenv("ALITOKEN"))
-                .addHeader("x-rapidapi-host", "aliexpress-datahub.p.rapidapi.com")
-                .build();
-        System.out.println(itemLink);
-        try {
-            Call call = client.newCall(request);
-            Response response = call.execute(); // Blocking call, may throw IOException
+    public String handleStartCommand(int userId, String userName) {
+        if (addUserToDatabase(userId, userName)) {
+            return "Вы успешно добавлены в базу данных!";
+        } else {
 
-            if (response.isSuccessful()) {
-                return response.body().string(); // Return the body as a string
-            } else {
-                return "Error: " + response.code(); // Handle error responses
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Request failed: " + e.getMessage(); // Handle failure
+            return commandMap.get("/start");
         }
     }
+
+
+    public String ApiResponse(String itemId) {
+    OkHttpClient client = new OkHttpClient();
+    String itemLink = "https://api.ozon.ru/v2/product/info" + itemId; // Пример конечной точки, замените на фактическую конечную точку Ozon
+    Request request = new Request.Builder()
+            .url(itemLink)
+            .get()
+            .addHeader("Authorization", "Bearer d22b8349-aa28-4796-a2a8-b728ba6a39a3") // Замените на свой ключ API Ozon
+            .build();
+    System.out.println(itemLink);
+    try {
+        Call call = client.newCall(request);
+        Response response = call.execute();
+
+        if (response.isSuccessful()) {
+            String jsonResponse = response.body().string();
+            JSONObject jsonObject = new JSONObject(jsonResponse);
+            String productName = jsonObject.getString("name"); 
+            return "Название товара: " + productName;
+        } else {
+            return "Ошибка: " + response.code();
+        }
+    } catch (IOException | JSONException e) {
+        e.printStackTrace();
+        return "Запрос не удался: " + e.getMessage();
+    }
+}
+
 
     public String checkForJsonDataError(String jsonResponse) {
         // Parse the JSON string
@@ -116,14 +130,9 @@ public class Logic {
         return "Promotion Price: $" + promotionPrice;
     }
 
-    public String processMessage(String inputMessage, int userId, String userName) {
-        if (inputMessage != null) {
-            switch (inputMessage) {
-                case "/start":
-                    // Вызываем метод для добавления пользователя в базу данных
-                    String result = addUserToDatabase(userId, userName);
-                    return result;
-
+    public String processMessage(String messageText, int userId, String userName) {
+        if (messageText != null) {
+            switch (messageText) {
                 case "/add":
                     // Логика для добавления товара
                     return commandMap.get("/add");
@@ -143,7 +152,7 @@ public class Logic {
                     return "Команда введена не верно";
             }
         } else {
-            String response = ApiResponse(inputMessage);
+            String response = ApiResponse(messageText);
             System.out.println(response);
 
             String errorCode = checkForJsonDataError(response);
@@ -162,22 +171,22 @@ public class Logic {
 
 
 
-    public String addUserToDatabase(int userId, String userName) {
-        // Вызов метода для добавления пользователя в базу данных
+    public boolean addUserToDatabase(int userId, String userName) {
         DatabaseConnection databaseConnection = new DatabaseConnection();
-        String sql = "INSERT INTO users (id, name) VALUES (?, ?)";
+        String sql = "INSERT INTO users (id, username) VALUES (?, ?)";
 
-        try (Connection connection = databaseConnection.connect();
+        try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
             preparedStatement.setInt(1, userId);
             preparedStatement.setString(2, userName);
-            preparedStatement.executeUpdate();
+            int rowsAffected = preparedStatement.executeUpdate();
 
-            return "Пользователь " + userName + " успешно добавлен в базу данных.";
+            return rowsAffected > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            e.printStackTrace();
+            return false;
+    }
 
     }
 }
