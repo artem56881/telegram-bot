@@ -32,27 +32,37 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Check if the update has a message and the message has text
+        // Проверяем, что обновление содержит сообщение и текст
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Retrieve the message text
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            // Create a SendMessage object with the received chat ID and message text
+            // Создаем объект SendMessage для ответа
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
 
-            String outputMessage = logic.processMessage(messageText);
-            message.setText(outputMessage);
+            // Обрабатываем команду /start
+            int userId = 0;
+            String userName = null;
+            if (messageText.equals("/start")) {
+                userId = Math.toIntExact(update.getMessage().getFrom().getId());
+                userName = update.getMessage().getFrom().getFirstName();
 
+                String startMessage = logic.handleStartCommand(userId, userName);
+                message.setText(startMessage);
+            } else {
+                // Обрабатываем остальные сообщения через логику
+                String outputMessage = logic.processMessage(messageText, userId, userName);
+                message.setText(outputMessage);
+            }
 
-            // Send the message back to the user
+            // Отправляем сообщение пользователю
             try {
                 execute(message);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
-    }
+}
 
 }
