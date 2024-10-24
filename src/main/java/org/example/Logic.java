@@ -1,48 +1,58 @@
 package org.example;
 
-
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-//import json.JSONObject;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.example.Config.DatabaseConnection;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Logic {
 
-    private final HashMap<String, String> commandMap = new HashMap<>();
 
+    private final Map<String, Message> commandMap = new HashMap<>();
 
-    public Logic(){
-
-        commandMap.put("/start", """
+    private final static Message help = new Message("""
                 Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
 
                 Команды:
                 /add - добавить товар для отслеживания
                 /list - показать список отслеживаемых товаров
                 /remove - удалить товар из списка отслеживания
-                /help - помощь""");
+                /help - помощь""",
+            List.of(new Button("start", "start")));
 
-        commandMap.put("/add", "Введите ID товара для добавления в список отслеживания.");
 
-        commandMap.put("/list", "Список отслеживаемых товаров:");
+    public Logic(){
 
-        commandMap.put("/remove", "Введите ID товара для удаления из списка отслеживания.");
+        commandMap.put("/start", help);
 
-        commandMap.put("/help", """
+        commandMap.put("/add", new Message("Введите ID товара для добавления в список отслеживания."));
+
+        commandMap.put("/list", new Message("Список отслеживаемых товаров:"));
+
+        commandMap.put("/remove", new Message("Введите ID товара для удаления из списка отслеживания."));
+
+        commandMap.put("/help", new Message("""
                 Список доступных команд:
                 /start - начать работу бота
                 /add - добавить товар для отслеживания
                 /list - показать список отслеживаемых товаров
                 /remove - удалить товар из списка отслеживания
-                /help - помощь""");
+                /help - помощь"""));
 
-        commandMap.put("/tst", ":DDDD");
+        commandMap.put("/tst", new Message(":DDDD"));
     }
 
     public String reverse(String message){
@@ -54,6 +64,16 @@ public class Logic {
         }
         System.out.println(reveres);
         return reveres.toString();
+    }
+
+
+    public Message handleStartCommand(long userId) {
+        if (addUserToDatabase(userId)) {
+            return new Message("Вы успешно добавлены в базу данных!");
+        } else {
+
+            return commandMap.get("/start");
+        }
     }
 
 
@@ -82,6 +102,7 @@ public class Logic {
         }
     }
 
+
     public String checkForJsonDataError(String jsonResponse) {
         // Parse the JSON string
         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
@@ -89,10 +110,10 @@ public class Logic {
         // Navigate through the JSON to extract the promotion price
         String errorCode;
         errorCode = jsonObject
-        .getAsJsonObject("result")
-        .getAsJsonObject("status")
-        .get("data")
-        .getAsString();
+                .getAsJsonObject("result")
+                .getAsJsonObject("status")
+                .get("data")
+                .getAsString();
 
         return errorCode;
     }
@@ -115,7 +136,13 @@ public class Logic {
     }
 
 
-    public String processMessage(String inputMessage){
+    public Message processMessage(String inputMessage, long userId) {
+
+        if (inputMessage.equals("/start")) {
+            //userName = update.getMessage().getFrom().getFirstName();
+
+            return handleStartCommand(userId);
+        }
 
         if (commandMap.containsKey(inputMessage)) {
             return commandMap.get(inputMessage);
@@ -127,15 +154,33 @@ public class Logic {
         String errorCode = checkForJsonDataError(response);
         System.out.println(errorCode);
 
-        if(errorCode.equals("error")){
-            return "error";
+        if (errorCode.equals("error")) {
+            return new Message("error");
         }
 
         String price = extractPromotionPrice(response);
         System.out.println(price);
 
-        return errorCode + ": " + price;
-
+        return new Message(errorCode + ": " + price);
     }
 
+
+    private boolean addUserToDatabase(long userId) {
+        DatabaseConnection databaseConnection = new DatabaseConnection();
+        String sql = "INSERT INTO users (id, username) VALUES (?, ?)";
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setInt(1, (int) userId);
+            preparedStatement.setString(2, "null");
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+    }
+
+    }
 }

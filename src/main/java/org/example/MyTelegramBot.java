@@ -3,7 +3,12 @@ package org.example;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyTelegramBot extends TelegramLongPollingBot {
     private final String token;
@@ -32,27 +37,45 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Check if the update has a message and the message has text
+        // Проверяем, что обновление содержит сообщение и текст
         if (update.hasMessage() && update.getMessage().hasText()) {
-            // Retrieve the message text
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            // Create a SendMessage object with the received chat ID and message text
+            // Создаем объект SendMessage для ответа
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
 
-            String outputMessage = logic.processMessage(messageText);
-            message.setText(outputMessage);
+            // Обрабатываем команду /start
+            int userId = 0;
+            String userName = null;
 
+            Message outputMessage = logic.processMessage(messageText, chatId);
+            message.setText(outputMessage.text());
+            List<InlineKeyboardButton> row1 = new ArrayList<>();
+            if(outputMessage.buttonList() != null){
+                InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+                for(Button b : outputMessage.buttonList()){
+                    InlineKeyboardButton button1 = new InlineKeyboardButton();
+                    button1.setText(b.name());
+                    button1.setCallbackData(b.data());
+                    row1.add(button1);
+                    rowsInline.add(row1);
+                }
+                markupInline.setKeyboard(rowsInline);
+                message.setReplyMarkup(markupInline);
+            }
 
             // Send the message back to the user
+            // Отправляем сообщение пользователю
             try {
                 execute(message);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
-    }
+}
 
 }
