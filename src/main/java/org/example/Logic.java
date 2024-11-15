@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 public class Logic {
-    
+
 
     private final HashMap<String, String> commandMap = new HashMap<>();
 
@@ -50,26 +50,18 @@ public class Logic {
         commandMap.put("/tst", ":DDDD");
     }
 
-    public String reverse(String message) {
-        StringBuilder reveres = new StringBuilder();
-        char[] reversedMessageArray = message.toCharArray();
-
-        for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
-            reveres.append(reversedMessageArray[i]);
-        }
-        System.out.println(reveres);
-        return reveres.toString();
-    }
-
 
     public String handleStartCommand(int userId, String userName) {
-        if (addUserToDatabase(userId, userName)) {
-            return "Вы успешно добавлены в базу данных!";
-        } else {
+        UserDatabaseService userDatabaseService = new UserDatabaseService();
+        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
 
-            return commandMap.get("/start");
+        if (userAdded) {
+            return "Пользователь добавлен успешно.";
+        } else {
+            return "Произошла ошибка при добавлении пользователя. Пожалуйста, попробуйте еще раз.";
         }
-    }
+}
+
 
 
     public String ApiResponse(String itemId) {
@@ -99,10 +91,8 @@ public class Logic {
 
 
     public String checkForJsonDataError(String jsonResponse) {
-        // Parse the JSON string
         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
 
-        // Navigate through the JSON to extract the promotion price
         String errorCode;
         errorCode = jsonObject
                 .getAsJsonObject("result")
@@ -167,10 +157,7 @@ public class Logic {
         }
     }
 
-
-
     public boolean addUserToDatabase(int userId, String userName) {
-        DatabaseConnection databaseConnection = new DatabaseConnection();
         String sql = "INSERT INTO users (id, username) VALUES (?, ?)";
 
         try (Connection connection = DatabaseConnection.connect();
@@ -184,7 +171,8 @@ public class Logic {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-    }
+        }
 
     }
+
 }
