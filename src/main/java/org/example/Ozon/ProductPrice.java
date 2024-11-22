@@ -24,7 +24,6 @@ public class ProductPrice {
                 String htmlContent = EntityUtils.toString(response.getEntity());
 //                System.out.println(htmlContent);
                 String ozonCardPrice = collectProductInfo(htmlContent).get("product_ozon_card_price");
-                System.out.print("Цена с озон картой: ");
 
                 return ozonCardPrice;
             }

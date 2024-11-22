@@ -10,13 +10,13 @@ import java.sql.SQLException;
 
 public class UserDatabaseService {
 
-    public boolean isUserIdExists(int userId) {
+    public boolean isUserIdExists(long userId) {
         String sql = "SELECT id FROM users WHERE id = ?";
 
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             return resultSet.next(); // Возвращает true, если запись найдена
@@ -26,7 +26,7 @@ public class UserDatabaseService {
         }
     }
 
-    public boolean addUserToDatabase(int userId, String userName) {
+    public boolean addUserToDatabase(long userId, String userName) {
         if (isUserIdExists(userId)) {
             // Пользователь с таким ID уже существует
             return false;
@@ -37,7 +37,7 @@ public class UserDatabaseService {
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
 
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             preparedStatement.setString(2, userName);
             int rowsAffected = preparedStatement.executeUpdate();
 

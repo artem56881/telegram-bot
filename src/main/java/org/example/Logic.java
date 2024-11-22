@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.example.Ozon.ProductPrice;
 import org.example.Config.DatabaseConnection;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,23 +21,22 @@ import java.util.List;
 import java.util.Map;
 
 public class Logic {
-    
 
 
     private final Map<String, Message> commandMap = new HashMap<>();
 
     private final static Message help = new Message("""
-                Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
+            Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
 
-                Команды:
-                /add - добавить товар для отслеживания
-                /list - показать список отслеживаемых товаров
-                /remove - удалить товар из списка отслеживания
-                /help - помощь""",
+            Команды:
+            /add - добавить товар для отслеживания
+            /list - показать список отслеживаемых товаров
+            /remove - удалить товар из списка отслеживания
+            /help - помощь""",
             List.of(new Button("start", "start")));
 
 
-    public Logic(){
+    public Logic() {
 
         commandMap.put("/start", help);
 
@@ -55,8 +55,13 @@ public class Logic {
                 /help - помощь"""));
 
         commandMap.put("/tst", new Message("FGDFG"));
+
+        commandMap.put("/price", toString(getProductPrice()));
     }
 
+    private Message toString(int productPrice) {
+        return new Message(String.valueOf(productPrice));
+    }
 
 
     public Message handleStartCommand(long userId, String userName) {
@@ -70,89 +75,18 @@ public class Logic {
     }
 
 
-    public String ApiResponse(String itemId) {
-        OkHttpClient client = new OkHttpClient();
-        String itemLink = "https://aliexpress-datahub.p.rapidapi.com/item_detail_2?itemId=" + itemId;
-        Request request = new Request.Builder()
-                .url(itemLink)
-                .get()
-                .addHeader("x-rapidapi-key", System.getenv("ALITOKEN"))
-                .addHeader("x-rapidapi-host", "aliexpress-datahub.p.rapidapi.com")
-                .build();
-        System.out.println(itemLink);
-        try {
-            Call call = client.newCall(request);
-            Response response = call.execute(); // Blocking call, may throw IOException
-
-            if (response.isSuccessful()) {
-                return response.body().string(); // Return the body as a string
-            } else {
-                return "Error: " + response.code(); // Handle error responses
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "Request failed: " + e.getMessage(); // Handle failure
-        }
-    }
-
-
-    public String checkForJsonDataError(String jsonResponse) {
-        // Parse the JSON string
-        JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
-
-        // Navigate through the JSON to extract the promotion price
-        String errorCode;
-        errorCode = jsonObject
-                .getAsJsonObject("result")
-                .getAsJsonObject("status")
-                .get("data")
-                .getAsString();
-
-        return errorCode;
-    }
-
-
-    public String extractPromotionPrice(String jsonResponse) {
-        JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
-
-        String promotionPrice = jsonObject
-                .getAsJsonObject("result")
-                .getAsJsonObject("item")
-                .getAsJsonObject("sku")
-                .getAsJsonObject("def")
-                .get("promotionPrice")
-                .getAsString();
-
-        return "Promotion Price: $" + promotionPrice;
-    }
-
-
     public Message processMessage(String inputMessage, long userId) {
 
         if (inputMessage.equals("/start")) {
             //userName = update.getMessage().getFrom().getFirstName();
-
             return handleStartCommand(userId, "default username");
-        }
 
+        }
         if (commandMap.containsKey(inputMessage)) {
             return commandMap.get(inputMessage);
         }
 
-        String response = ApiResponse(inputMessage);
-        System.out.println(response);
-
-        String errorCode = checkForJsonDataError(response);
-        System.out.println(errorCode);
-
-        if (errorCode.equals("error")) {
-            return new Message("error");
-        }
-
-        String price = extractPromotionPrice(response);
-        System.out.println(price);
-
-        return new Message(errorCode + ": " + price);
+        return null;
     }
 
     public static int getProductPrice() {
@@ -168,5 +102,4 @@ public class Logic {
         return price;
     }
 
-    }
 }
