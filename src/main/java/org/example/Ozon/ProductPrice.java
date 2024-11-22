@@ -9,9 +9,10 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import static org.example.ProductInfoCollector.collectProductInfo;
 
 
-public class FetchHTML {
-    public static void main(String[] args) {
-        String url = "https://www.ozon.ru/product/nabor-bokalov-dlya-vina-ozon-home-provans-360-ml-6-sht-1171098530/?campaignId=509&oos_search=false";
+public class ProductPrice {
+
+    public String GetPrice() {
+        String url = "https://www.ozon.ru/product/pena-dlya-chistki-obuvi-podoshv-i-rantov-salton-sport-200-ml-1747698705/?avtc=1&avte=4&avts=1732268221";
 
         // Create an HttpClient instance
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
@@ -25,11 +26,12 @@ public class FetchHTML {
                 String ozonCardPrice = collectProductInfo(htmlContent).get("product_ozon_card_price");
                 System.out.print("Цена с озон картой: ");
 
-                System.out.println(ozonCardPrice);
+                return ozonCardPrice;
             }
         } catch (Exception e) {
             System.err.println("Error fetching the HTML content: " + e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
+        return null;
     }
 }

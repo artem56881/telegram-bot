@@ -1,19 +1,17 @@
 package org.example;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.example.Config.DatabaseConnection;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.example.Ozon.ProductPrice;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 
 public class Logic {
@@ -46,8 +44,7 @@ public class Logic {
                 /list - показать список отслеживаемых товаров
                 /remove - удалить товар из списка отслеживания
                 /help - помощь""");
-
-        commandMap.put("/tst", ":DDDD");
+        commandMap.put("/цена", "Показывает цену определённого товара по ссылке");
     }
 
 
@@ -56,12 +53,11 @@ public class Logic {
         boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
 
         if (userAdded) {
-            return "Пользователь добавлен успешно.";
+            return "Спасибо, что пользуйтесь нашим ботом!";
         } else {
-            return "Произошла ошибка при добавлении пользователя. Пожалуйста, попробуйте еще раз.";
+            return "Мы вас уже запомнили";
         }
-}
-
+    }
 
 
     public String ApiResponse(String itemId) {
@@ -118,6 +114,7 @@ public class Logic {
         return "Promotion Price: $" + promotionPrice;
     }
 
+
     public String processMessage(String messageText, int userId, String userName) {
         if (messageText != null) {
             switch (messageText) {
@@ -136,6 +133,12 @@ public class Logic {
                 case "/help":
                     // Логика для помощи
                     return commandMap.get("/help");
+
+                case "/цена":
+                    return to_String(getProductPrice());
+
+                case "абоба":
+                    return "test";
                 default:
                     return "Команда введена не верно";
             }
@@ -157,22 +160,23 @@ public class Logic {
         }
     }
 
-    public boolean addUserToDatabase(int userId, String userName) {
-        String sql = "INSERT INTO users (id, username) VALUES (?, ?)";
+    private String to_String(int productPrice) {
+        String res = String.valueOf(productPrice);
+        System.out.println(res);
+        return res;
+    }
 
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-            preparedStatement.setInt(1, userId);
-            preparedStatement.setString(2, userName);
-            int rowsAffected = preparedStatement.executeUpdate();
-
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+    public static int getProductPrice() {
+        ProductPrice responce = new ProductPrice();
+        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
+        Matcher matcher = pattern.matcher((CharSequence) responce.GetPrice());
+        int price = 0;
+        if (matcher.find()) {
+            String priceString = matcher.group();
+            priceString = priceString.replaceAll("\\s", "");
+            price = Integer.parseInt(priceString);
         }
-
+        return price;
     }
 
 }
