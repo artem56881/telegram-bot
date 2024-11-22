@@ -1,15 +1,16 @@
 package org.example;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.example.Ozon.ProductPrice;
 import org.example.Config.DatabaseConnection;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Logic {
+    
 
 
     private final Map<String, Message> commandMap = new HashMap<>();
@@ -52,27 +54,18 @@ public class Logic {
                 /remove - удалить товар из списка отслеживания
                 /help - помощь"""));
 
-        commandMap.put("/tst", new Message(":DDDD"));
-    }
-
-    public String reverse(String message){
-        StringBuilder reveres = new StringBuilder();
-        char[] reversedMessageArray = message.toCharArray();
-
-        for (int i = reversedMessageArray.length - 1; i >= 0; i--) {
-            reveres.append(reversedMessageArray[i]);
-        }
-        System.out.println(reveres);
-        return reveres.toString();
+        commandMap.put("/tst", new Message("FGDFG"));
     }
 
 
-    public Message handleStartCommand(long userId) {
-        if (addUserToDatabase(userId)) {
-            return new Message("Вы успешно добавлены в базу данных!");
+
+    public Message handleStartCommand(long userId, String userName) {
+        UserDatabaseService userDatabaseService = new UserDatabaseService();
+        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
+        if (userAdded) {
+            return new Message("Спасибо, что пользуйтесь нашим ботом!");
         } else {
-
-            return commandMap.get("/start");
+            return new Message("Мы вас уже запомнили");
         }
     }
 
@@ -120,10 +113,8 @@ public class Logic {
 
 
     public String extractPromotionPrice(String jsonResponse) {
-        // Parse the JSON string
         JsonObject jsonObject = JsonParser.parseString(jsonResponse).getAsJsonObject();
 
-        // Navigate through the JSON to extract the promotion price
         String promotionPrice = jsonObject
                 .getAsJsonObject("result")
                 .getAsJsonObject("item")
@@ -141,7 +132,7 @@ public class Logic {
         if (inputMessage.equals("/start")) {
             //userName = update.getMessage().getFrom().getFirstName();
 
-            return handleStartCommand(userId);
+            return handleStartCommand(userId, "default username");
         }
 
         if (commandMap.containsKey(inputMessage)) {
@@ -164,22 +155,17 @@ public class Logic {
         return new Message(errorCode + ": " + price);
     }
 
-
-    private boolean addUserToDatabase(long userId) {
-        DatabaseConnection databaseConnection = new DatabaseConnection();
-        String sql = "INSERT INTO users (id, username) VALUES (?, ?)";
-
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-
-            preparedStatement.setInt(1, (int) userId);
-            preparedStatement.setString(2, "null");
-            int rowsAffected = preparedStatement.executeUpdate();
-
-            return rowsAffected > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+    public static int getProductPrice() {
+        ProductPrice responce = new ProductPrice();
+        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
+        Matcher matcher = pattern.matcher((CharSequence) responce.GetPrice());
+        int price = 0;
+        if (matcher.find()) {
+            String priceString = matcher.group();
+            priceString = priceString.replaceAll("\\s", "");
+            price = Integer.parseInt(priceString);
+        }
+        return price;
     }
 
     }
