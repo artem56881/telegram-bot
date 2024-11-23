@@ -1,4 +1,4 @@
-package org.example;
+package org.example.ozon;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -52,13 +52,18 @@ public class ProductInfoCollector {
 
             // Extract product prices
             String ozonCardPrice = null, discountPrice = null, basePrice = null;
-
             // Ozon card price
             Element ozonCardPriceElement = document.selectFirst("span:contains(c Ozon Картой)");
             if (ozonCardPriceElement != null) {
                 Element priceElement = ozonCardPriceElement.parent().selectFirst("div span");
                 if (priceElement != null) {
-                    ozonCardPrice = priceElement.text().trim();
+                    ozonCardPrice = priceElement.text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
+                }
+            } else {
+                // Если цены с Ozon картой нет, то ищем обычную цену
+                Element priceElement = document.selectFirst("div.c102__price span");
+                if (priceElement != null) {
+                    ozonCardPrice = priceElement.text().trim().replaceAll("\\s+", "");
                 }
             }
 
@@ -67,13 +72,16 @@ public class ProductInfoCollector {
             if (priceContainer != null) {
                 var priceElements = priceContainer.select("span");
                 if (priceElements.size() == 2) {
-                    discountPrice = priceElements.get(0).text().trim();
-                    basePrice = priceElements.get(1).text().trim();
+                    discountPrice = priceElements.get(0).text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
+                    basePrice = priceElements.get(1).text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
                 } else if (priceElements.size() == 1) {
-                    discountPrice = ozonCardPrice == null ? priceElements.get(0).text().trim() : null;
+                    discountPrice = ozonCardPrice == null ? priceElements.get(0).text().trim().replaceAll("\\s+", "") : null;
                     basePrice = discountPrice != null ? discountPrice : null;
                 }
-            }
+
+                            }
+
+
             productInfo.put("product_ozon_card_price", ozonCardPrice);
             productInfo.put("product_discount_price", discountPrice);
             productInfo.put("product_base_price", basePrice);
@@ -84,14 +92,5 @@ public class ProductInfoCollector {
         }
 
         return productInfo;
-    }
-
-    public static void main(String[] args) {
-        // Example usage
-        String sampleHtml = "<html>...</html>"; // Replace with actual HTML content
-        Map<String, String> productInfo = collectProductInfo(sampleHtml);
-
-        // Print the extracted product information
-        productInfo.forEach((key, value) -> System.out.println(key + ": " + value));
     }
 }

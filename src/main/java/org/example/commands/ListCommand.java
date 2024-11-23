@@ -1,4 +1,4 @@
-package org.example.Commands;
+package org.example.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.example.Config.DatabaseConnection;
+import org.example.config.DatabaseConnection;
 
 
 public class ListCommand {

@@ -1,4 +1,4 @@
-package org.example.Entity;
+package org.example.entity;
 
 public class User {
     private Long id;

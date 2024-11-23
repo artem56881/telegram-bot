@@ -3,19 +3,8 @@ package org.example;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.example.Ozon.ProductPrice;
-import org.example.Config.DatabaseConnection;
+import org.example.ozon.ProductPrice;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +45,6 @@ public class Logic {
 
         commandMap.put("/tst", new Message("FGDFG"));
 
-        commandMap.put("/price", toString(getProductPrice()));
     }
 
     private Message toString(int productPrice) {
@@ -86,20 +74,51 @@ public class Logic {
             return commandMap.get(inputMessage);
         }
 
+        if (isValidUrl(inputMessage)) {
+            int price = getProductPrice(inputMessage);
+            String priceText = "Цена товара: " + price + " ₽";
+            return new Message(priceText);
+        }
+
         return null;
     }
 
-    public static int getProductPrice() {
-        ProductPrice responce = new ProductPrice();
-        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
-        Matcher matcher = pattern.matcher((CharSequence) responce.GetPrice());
-        int price = 0;
-        if (matcher.find()) {
-            String priceString = matcher.group();
-            priceString = priceString.replaceAll("\\s", "");
-            price = Integer.parseInt(priceString);
-        }
-        return price;
+    private boolean isValidUrl(String url) {
+        String regex = "https?://\\S+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
     }
+
+
+    public static int getProductPrice(String inputLink) {
+        ProductPrice productPrice = new ProductPrice();
+        String priceString = productPrice.getPrice(inputLink);
+
+        if (priceString == null || priceString.isEmpty()) {
+            System.err.println("Failed to retrieve product price. Price string is null or empty.");
+            return 0;
+        }
+
+        // Регулярное выражение для извлечения числового значения цены
+        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
+        Matcher matcher = pattern.matcher(priceString);
+        int price = 0;
+
+        if (matcher.find()) {
+            // Извлекаем числовое значение, убирая пробелы
+            priceString = matcher.group().replaceAll("\\s", "");
+            try {
+                price = Integer.parseInt(priceString);
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing price string to integer: " + e.getMessage());
+            }
+        } else {
+            System.err.println("Price not found in the response string.");
+        }
+
+        return price;
+}
+
 
 }

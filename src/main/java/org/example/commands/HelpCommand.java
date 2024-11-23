@@ -1,4 +1,4 @@
-package org.example.Commands;
+package org.example.commands;
 
 public class HelpCommand {
 }
