@@ -16,7 +16,7 @@ public class AddCommand {
         this.trackedProducts = trackedProducts;
     }
 
-    public String execute(String productId, String productName, double price) {
+    public String execute(String productId, String productName, long price) {
         if (trackedProducts.containsKey(productId)) {
             return "Товар уже добавлен в отслеживаемые";
         } else {

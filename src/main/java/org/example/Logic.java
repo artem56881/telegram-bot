@@ -29,7 +29,7 @@ public class Logic {
 
         commandMap.put("/start", help);
 
-        commandMap.put("/add", new Message("Введите ID товара для добавления в список отслеживания."));
+        commandMap.put("/add", new Message("Введите ссылку на товар"));
 
         commandMap.put("/list", new Message("Список отслеживаемых товаров:"));
 
@@ -101,13 +101,17 @@ public class Logic {
         }
 
         // Регулярное выражение для извлечения числового значения цены
+        System.out.println(priceString);
         Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
         Matcher matcher = pattern.matcher(priceString);
         int price = 0;
 
         if (matcher.find()) {
-            // Извлекаем числовое значение, убирая пробелы
-            priceString = matcher.group().replaceAll("\\s", "");
+//          priceString = matcher.group().replaceAll("\\s", "");
+            priceString = priceString.replaceAll("₽", " ");
+            priceString = priceString.replaceAll(" ", "");
+            priceString = priceString.replaceAll(" ", "");
+            System.out.println(priceString);
             try {
                 price = Integer.parseInt(priceString);
             } catch (NumberFormatException e) {
@@ -118,7 +122,5 @@ public class Logic {
         }
 
         return price;
-}
-
-
+    }
 }
