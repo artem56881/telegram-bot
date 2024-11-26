@@ -9,8 +9,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.example.Ozon.ProductPrice;
 import org.example.Config.DatabaseConnection;
+
+import org.example.Ozon.ProductInfoCollector;
+import org.example.Ozon.FetchHtml;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -55,8 +57,7 @@ public class Logic {
                 /help - помощь"""));
 
         commandMap.put("/tst", new Message("FGDFG"));
-
-        commandMap.put("/price", toString(getProductPrice()));
+        commandMap.put("/price", new Message(ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml("https://www.ozon.ru/product/mysh-oklik-385m-chernyy-krasnyy-opticheskaya-1000dpi-usb-dlya-noutbuka-3but-210972580/?avtc=1&avte=4&avts=1732557196")).get("base_price")));
     }
 
     private Message toString(int productPrice) {
@@ -87,19 +88,6 @@ public class Logic {
         }
 
         return null;
-    }
-
-    public static int getProductPrice() {
-        ProductPrice responce = new ProductPrice();
-        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
-        Matcher matcher = pattern.matcher((CharSequence) responce.GetPrice());
-        int price = 0;
-        if (matcher.find()) {
-            String priceString = matcher.group();
-            priceString = priceString.replaceAll("\\s", "");
-            price = Integer.parseInt(priceString);
-        }
-        return price;
     }
 
 }
