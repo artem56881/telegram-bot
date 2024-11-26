@@ -20,15 +20,16 @@ public class ProductInfoCollector {
             System.out.println(scriptElement.html());
 
             String ldJson = scriptElement.html();
+
             String basePrice = ldJson.substring(ldJson.indexOf("\"price\":\"")+9, ldJson.indexOf("\",\"priceC"));
-
             String itemId = ldJson.substring(ldJson.indexOf("\"sku\":\"")+7, ldJson.lastIndexOf("\"}"));
-
-            System.out.println(basePrice);
-            System.out.println(itemId);
+            String itemName = ldJson.substring(ldJson.indexOf("\"name\":\"")+8, ldJson.lastIndexOf("\",\"offe"));
+            String itemRating = ldJson.substring(ldJson.indexOf("\"ratingValue\":\"")+15, ldJson.lastIndexOf("\",\"reviewCou"));
 
             productInfo.put("base_price", basePrice);
             productInfo.put("item_id", itemId);
+            productInfo.put("item_name", itemName);
+            productInfo.put("item_rating", itemRating);
 
         } catch (Exception e) {
             System.err.println("Error parsing HTML content: " + e.getMessage());
