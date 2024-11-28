@@ -22,7 +22,7 @@ public class UserDatabaseService {
             return resultSet.next(); // Возвращает true, если запись найдена
         } catch (SQLException e) {
             e.printStackTrace();
-            return false; // Возвращает false в случае ошибки
+            return false;
         }
     }
 

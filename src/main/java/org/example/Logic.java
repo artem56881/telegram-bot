@@ -3,14 +3,24 @@ package org.example;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.example.ozon.ProductPrice;
+import org.checkerframework.checker.units.qual.A;
+import org.example.commands.AddCommand;
+import org.example.commands.ListCommand;
+import org.example.commands.RemoveCommand;
+import org.example.ozon.ProductItems;
+import org.python.antlr.ast.Str;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class Logic {
 
+//    ProductItems Items = new ProductItems();
+
+
+    private final Map<Long, String> userStates = new HashMap<>();
 
     private final Map<String, Message> commandMap = new HashMap<>();
 
@@ -63,25 +73,81 @@ public class Logic {
     }
 
 
+    /**
+     * @param inputMessage
+     * @param userId
+     * @return Добавил сохранение состояния пользователя в userStates
+     */
+
     public Message processMessage(String inputMessage, long userId) {
 
         if (inputMessage.equals("/start")) {
-            //userName = update.getMessage().getFrom().getFirstName();
+            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние пользователя
             return handleStartCommand(userId, "default username");
-
         }
+
+        if (inputMessage.equals("/add")) {
+            userStates.put(userId, "AWAITING_PRODUCT_LINK"); // Устанавливаем состояние ожидания ссылки
+            return new Message("Введите ссылку на товар для отслеживания:");
+        }
+
+
+        if ("AWAITING_PRODUCT_LINK".equals(userStates.get(userId))) {
+            if (isValidUrl(inputMessage)) {
+                AddCommand addCommand = new AddCommand();
+                Long productId = getProductID(inputMessage);
+                String productName = getProductName(inputMessage);
+                int productPrice = getProductPrice(inputMessage);
+
+                String result = addCommand.execute(productId, productName, productPrice);
+
+                userStates.put(userId, "DEFAULT");
+                return new Message(result);
+            } else {
+                return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.");
+            }
+        }
+        if (inputMessage.equals("/remove")) {
+            userStates.put(userId, "AWAITING_PRODUCT_LINK_FOR_REMOVAL");
+            return new Message("Введите ссылку на товар, который хотите удалить:");
+        }
+
+        if ("AWAITING_PRODUCT_LINK_FOR_REMOVAL".equals(userStates.get(userId))) {
+            if (isValidUrl(inputMessage)) {
+                // Извлечение имени товара из ссылки
+                String productName = getProductName(inputMessage);
+
+                if (productName != null) {
+                    RemoveCommand removeCommand = new RemoveCommand();
+                    String result = removeCommand.execute(productName);
+
+                    // Сбрасываем состояние пользователя
+                    userStates.put(userId, "DEFAULT");
+                    return new Message(result);
+                } else {
+                    return new Message("Не удалось найти товар по указанной ссылке.");
+                }
+            } else {
+                return new Message("Пожалуйста, введите корректную ссылку на товар.");
+            }
+        }
+
+
+        if (inputMessage.equals("/list")) {
+            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние
+            ListCommand listCommand = new ListCommand(new HashMap<>());
+            String result = listCommand.execute();
+            return new Message(result);
+        }
+
+
         if (commandMap.containsKey(inputMessage)) {
             return commandMap.get(inputMessage);
         }
 
-        if (isValidUrl(inputMessage)) {
-            int price = getProductPrice(inputMessage);
-            String priceText = "Цена товара: " + price + " ₽";
-            return new Message(priceText);
-        }
-
-        return null;
+        return new Message("Неизвестная команда. Используйте /help для списка доступных команд.");
     }
+
 
     private boolean isValidUrl(String url) {
         String regex = "https?://\\S+";
@@ -92,7 +158,7 @@ public class Logic {
 
 
     public static int getProductPrice(String inputLink) {
-        ProductPrice productPrice = new ProductPrice();
+        ProductItems productPrice = new ProductItems();
         String priceString = productPrice.getPrice(inputLink);
 
         if (priceString == null || priceString.isEmpty()) {
@@ -123,4 +189,21 @@ public class Logic {
 
         return price;
     }
+
+    public static Long getProductID(String inputLink) {
+        try {
+            ProductItems items = new ProductItems();
+            return items.getId(inputLink);
+        } catch (Exception e) {
+            System.err.println("Ошибка при получении ID продукта: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    public static String getProductName(String inputLink) {
+        ProductItems Items = new ProductItems();
+        return Items.getName(inputLink);
+    }
+
 }
