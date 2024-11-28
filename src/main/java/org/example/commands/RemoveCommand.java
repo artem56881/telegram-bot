@@ -12,10 +12,8 @@ public class RemoveCommand {
     private static final String GET_PRODUCT_ID_SQL = "SELECT id FROM products WHERE name = ?";
     private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE id = ?";
 
-    public String execute(String productName) {
+    public String execute(Long productId) {
         try {
-            Long productId = getProductIdByName(productName);
-
             if (productId != null) {
                 deleteProductFromDatabase(productId);
                 return "Товар успешно удален из базы данных.";
@@ -26,20 +24,6 @@ public class RemoveCommand {
             e.printStackTrace();
             return "Ошибка при удалении товара из базы данных: " + e.getMessage();
         }
-    }
-
-    private Long getProductIdByName(String productName) throws SQLException {
-        try (Connection connection = DatabaseConnection.connect();
-             PreparedStatement preparedStatement = connection.prepareStatement(GET_PRODUCT_ID_SQL)) {
-
-            preparedStatement.setString(1, productName);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getLong("id");
-                }
-            }
-        }
-        return null;
     }
 
     private void deleteProductFromDatabase(Long productId) throws SQLException {

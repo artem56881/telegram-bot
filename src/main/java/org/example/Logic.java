@@ -57,7 +57,6 @@ public class Logic {
                 /help - помощь"""));
 
         commandMap.put("/tst", new Message("FGDFG"));
-        commandMap.put("/price", new Message(ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml("https://www.ozon.ru/product/mysh-oklik-385m-chernyy-krasnyy-opticheskaya-1000dpi-usb-dlya-noutbuka-3but-210972580/?avtc=1&avte=4&avts=1732557196")).get("base_price")));
     }
 
     private Message toString(int productPrice) {
@@ -123,12 +122,12 @@ public class Logic {
                 // Извлечение ID товара из ссылки
                 Map<String, String> productInfo =  ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
-                String productId = productInfo.get("item_name");
+                String productId = productInfo.get("item_id");
 
                 if (productId != null) {
                     RemoveCommand removeCommand = new RemoveCommand();
                     //удаляем товар по ID
-                    String result = removeCommand.execute(productId);
+                    String result = removeCommand.execute(Long.valueOf(productId));
 
                     // Сбрасываем состояние пользователя
                     userStates.put(userId, "DEFAULT");
