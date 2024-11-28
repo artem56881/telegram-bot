@@ -30,7 +30,6 @@ public class AddCommand {
      */
     public String execute(Long productId, String productName, int price) {
         try {
-            // Проверка на существование в базе данных
             if (isProductInDatabase(productId)) {
                 return "Товар уже добавлен в отслеживаемые";
             }

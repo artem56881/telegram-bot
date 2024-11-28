@@ -1,4 +1,4 @@
-package org.example.Ozon;
+package org.example.ozon;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

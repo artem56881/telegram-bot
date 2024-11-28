@@ -3,15 +3,11 @@ package org.example;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import org.example.Config.DatabaseConnection;
+import org.example.commands.AddCommand;
+import org.example.commands.ListCommand;
+import org.example.commands.RemoveCommand;
 
-import org.example.Ozon.ProductInfoCollector;
+import org.example.ozon.ProductInfoCollector;
 import org.example.Ozon.FetchHtml;
 
 import java.io.IOException;
@@ -102,6 +98,7 @@ public class Logic {
         if ("AWAITING_PRODUCT_LINK".equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
                 AddCommand addCommand = new AddCommand();
+
                 Long productId = getProductID(inputMessage);
                 String productName = getProductName(inputMessage);
                 int productPrice = getProductPrice(inputMessage);
