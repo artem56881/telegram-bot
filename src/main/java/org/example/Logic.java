@@ -3,17 +3,24 @@ package org.example;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.checkerframework.checker.units.qual.A;
-import org.example.commands.AddCommand;
-import org.example.commands.ListCommand;
-import org.example.commands.RemoveCommand;
-import org.example.ozon.ProductItems;
-import org.python.antlr.ast.Str;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.example.Config.DatabaseConnection;
 
+import org.example.Ozon.ProductInfoCollector;
+import org.example.Ozon.FetchHtml;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class Logic {
 
@@ -54,7 +61,7 @@ public class Logic {
                 /help - помощь"""));
 
         commandMap.put("/tst", new Message("FGDFG"));
-
+        commandMap.put("/price", new Message(ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml("https://www.ozon.ru/product/mysh-oklik-385m-chernyy-krasnyy-opticheskaya-1000dpi-usb-dlya-noutbuka-3but-210972580/?avtc=1&avte=4&avts=1732557196")).get("base_price")));
     }
 
     private Message toString(int productPrice) {

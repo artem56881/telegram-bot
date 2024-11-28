@@ -1,4 +1,4 @@
-package org.example.ozon;
+package org.example.Ozon;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,75 +16,20 @@ public class ProductInfoCollector {
             // Parse the HTML content with Jsoup
             Document document = Jsoup.parse(htmlContent);
 
-            // Extract product ID
-            String productId = null;
-            Element productIdElement = document.selectFirst("div:contains(Артикул: )");
-            if (productIdElement != null) {
-                String text = productIdElement.text();
-                if (text.contains("Артикул: ")) {
-                    productId = text.split("Артикул: ")[1].trim();
-                }
-            }
-            productInfo.put("product_id", productId);
+            Element scriptElement = document.selectFirst("script[type=\"application/ld+json\"]");
+            System.out.println(scriptElement.html());
 
-            // Extract product name
-            String productName = null;
-            Element productNameElement = document.selectFirst("div[data-widget=webProductHeading] h1");
-            if (productNameElement != null) {
-                productName = productNameElement.text().trim();
-            }
-            productInfo.put("product_name", productName);
+            String ldJson = scriptElement.html();
 
-            // Extract product statistics
-            String productStatistic = null, productStars = null, productReviews = null;
-            Element statisticElement = document.selectFirst("div[data-widget=webSingleProductScore]");
-            if (statisticElement != null) {
-                productStatistic = statisticElement.text().trim();
-                if (productStatistic.contains(" • ")) {
-                    String[] parts = productStatistic.split(" • ");
-                    productStars = parts[0].trim();
-                    productReviews = parts[1].trim();
-                }
-            }
-            productInfo.put("product_statistic", productStatistic);
-            productInfo.put("product_stars", productStars);
-            productInfo.put("product_reviews", productReviews);
+            String basePrice = ldJson.substring(ldJson.indexOf("\"price\":\"")+9, ldJson.indexOf("\",\"priceC"));
+            String itemId = ldJson.substring(ldJson.indexOf("\"sku\":\"")+7, ldJson.lastIndexOf("\"}"));
+            String itemName = ldJson.substring(ldJson.indexOf("\"name\":\"")+8, ldJson.lastIndexOf("\",\"offe"));
+            String itemRating = ldJson.substring(ldJson.indexOf("\"ratingValue\":\"")+15, ldJson.lastIndexOf("\",\"reviewCou"));
 
-            // Extract product prices
-            String ozonCardPrice = null, discountPrice = null, basePrice = null;
-            // Ozon card price
-            Element ozonCardPriceElement = document.selectFirst("span:contains(c Ozon Картой)");
-            if (ozonCardPriceElement != null) {
-                Element priceElement = ozonCardPriceElement.parent().selectFirst("div span");
-                if (priceElement != null) {
-                    ozonCardPrice = priceElement.text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
-                }
-            } else {
-                // Если цены с Ozon картой нет, то ищем обычную цену
-                Element priceElement = document.selectFirst("div.c102__price span");
-                if (priceElement != null) {
-                    ozonCardPrice = priceElement.text().trim().replaceAll("\\s+", "");
-                }
-            }
-
-            // Discount and base prices
-            Element priceContainer = document.selectFirst("div[data-widget=webPrice]");
-            if (priceContainer != null) {
-                var priceElements = priceContainer.select("span");
-                if (priceElements.size() == 2) {
-                    discountPrice = priceElements.get(0).text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
-                    basePrice = priceElements.get(1).text().trim().replaceAll("\\s+", ""); // Удаляем все пробелы
-                } else if (priceElements.size() == 1) {
-                    discountPrice = ozonCardPrice == null ? priceElements.get(0).text().trim().replaceAll("\\s+", "") : null;
-                    basePrice = discountPrice != null ? discountPrice : null;
-                }
-
-                            }
-
-
-            productInfo.put("product_ozon_card_price", ozonCardPrice);
-            productInfo.put("product_discount_price", discountPrice);
-            productInfo.put("product_base_price", basePrice);
+            productInfo.put("base_price", basePrice);
+            productInfo.put("item_id", itemId);
+            productInfo.put("item_name", itemName);
+            productInfo.put("item_rating", itemRating);
 
         } catch (Exception e) {
             System.err.println("Error parsing HTML content: " + e.getMessage());
