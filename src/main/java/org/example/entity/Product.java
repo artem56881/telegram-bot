@@ -2,20 +2,6 @@ package org.example.entity;
 
 import java.util.Objects;
 
-/*public class Product
-{
-    private Long productID;
-    private String productName;
-    private Long productPrice;
-    private List<User> subscribes;
-
-    public Product(Long productID, String productName, Long productPrice, List<User> subscribes){
-        this.productID = productID;
-        this.productName = productName;
-        this.productPrice = productPrice;
-        this.subscribes = subscribes;
-    }
-}*/
 
 public final class Product {
     private final Long id;
