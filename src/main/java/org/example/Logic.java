@@ -10,29 +10,22 @@ import org.example.commands.RemoveCommand;
 import org.example.ozon.ProductInfoCollector;
 import org.example.ozon.FetchHtml;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Logic {
 
-//    ProductItems Items = new ProductItems();
-
-
     private final Map<Long, String> userStates = new HashMap<>();
 
     private final Map<String, Message> commandMap = new HashMap<>();
 
     private final static Message help = new Message("""
-            Бот отслеживает цены на выбранные вами товары на AliExpress и отправляет уведомление, когда цена снижается до желаемого уровня.\s
+            Бот отслеживает цены на выбранные вами товары на Ozon и отправляет уведомление, когда цена снижается до желаемого уровня.\s
 
             Команды:
             /add - добавить товар для отслеживания
-            /list - показать список отслеживаемых товаров
+            /list - показать список отслеживаемых то`варов
             /remove - удалить товар из списка отслеживания
             /help - помощь""",
             List.of(new Button("start", "start")));
@@ -59,10 +52,6 @@ public class Logic {
         commandMap.put("/tst", new Message("FGDFG"));
     }
 
-    private Message toString(int productPrice) {
-        return new Message(String.valueOf(productPrice));
-    }
-
 
     public Message handleStartCommand(long userId, String userName) {
         UserDatabaseService userDatabaseService = new UserDatabaseService();
@@ -80,7 +69,6 @@ public class Logic {
      * @param userId
      * @return Добавил сохранение состояния пользователя в userStates
      */
-
     public Message processMessage(String inputMessage, long userId) {
 
         if (inputMessage.equals("/start")) {
