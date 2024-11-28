@@ -1,4 +1,4 @@
-package org.example.Ozon;
+package org.example.ozon;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;

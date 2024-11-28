@@ -8,7 +8,7 @@ import org.example.commands.ListCommand;
 import org.example.commands.RemoveCommand;
 
 import org.example.ozon.ProductInfoCollector;
-import org.example.Ozon.FetchHtml;
+import org.example.ozon.FetchHtml;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -99,9 +99,11 @@ public class Logic {
             if (isValidUrl(inputMessage)) {
                 AddCommand addCommand = new AddCommand();
 
-                Long productId = getProductID(inputMessage);
-                String productName = getProductName(inputMessage);
-                int productPrice = getProductPrice(inputMessage);
+                Map<String, String> productInfo =  ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
+
+                Long productId = Long.valueOf(productInfo.get("item_id"));
+                String productName = productInfo.get("item_name");
+                int productPrice = Integer.parseInt(productInfo.get("base_price"));
 
                 String result = addCommand.execute(productId, productName, productPrice);
 
@@ -118,12 +120,15 @@ public class Logic {
 
         if ("AWAITING_PRODUCT_LINK_FOR_REMOVAL".equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
-                // Извлечение имени товара из ссылки
-                String productName = getProductName(inputMessage);
+                // Извлечение ID товара из ссылки
+                Map<String, String> productInfo =  ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
-                if (productName != null) {
+                String productId = productInfo.get("item_name");
+
+                if (productId != null) {
                     RemoveCommand removeCommand = new RemoveCommand();
-                    String result = removeCommand.execute(productName);
+                    //удаляем товар по ID
+                    String result = removeCommand.execute(productId);
 
                     // Сбрасываем состояние пользователя
                     userStates.put(userId, "DEFAULT");
@@ -158,56 +163,6 @@ public class Logic {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(url);
         return matcher.matches();
-    }
-
-
-    public static int getProductPrice(String inputLink) {
-        ProductItems productPrice = new ProductItems();
-        String priceString = productPrice.getPrice(inputLink);
-
-        if (priceString == null || priceString.isEmpty()) {
-            System.err.println("Failed to retrieve product price. Price string is null or empty.");
-            return 0;
-        }
-
-        // Регулярное выражение для извлечения числового значения цены
-        System.out.println(priceString);
-        Pattern pattern = Pattern.compile("\\d+(?:\\s\\d+)*");
-        Matcher matcher = pattern.matcher(priceString);
-        int price = 0;
-
-        if (matcher.find()) {
-//          priceString = matcher.group().replaceAll("\\s", "");
-            priceString = priceString.replaceAll("₽", " ");
-            priceString = priceString.replaceAll(" ", "");
-            priceString = priceString.replaceAll(" ", "");
-            System.out.println(priceString);
-            try {
-                price = Integer.parseInt(priceString);
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing price string to integer: " + e.getMessage());
-            }
-        } else {
-            System.err.println("Price not found in the response string.");
-        }
-
-        return price;
-    }
-
-    public static Long getProductID(String inputLink) {
-        try {
-            ProductItems items = new ProductItems();
-            return items.getId(inputLink);
-        } catch (Exception e) {
-            System.err.println("Ошибка при получении ID продукта: " + e.getMessage());
-            return null;
-        }
-    }
-
-
-    public static String getProductName(String inputLink) {
-        ProductItems Items = new ProductItems();
-        return Items.getName(inputLink);
     }
 
 }
