@@ -37,27 +37,25 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // Проверяем, что обновление содержит сообщение и текст
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
 
-            // Создаем объект SendMessage для ответа
+
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
 
-            // Обрабатываем команду /start
             int userId = 0;
             String userName = null;
 
             Message outputMessage = logic.processMessage(messageText, chatId);
             message.setText(outputMessage.text());
             List<InlineKeyboardButton> row1 = new ArrayList<>();
-            if(outputMessage.buttonList() != null){
+            if (outputMessage.buttonList() != null) {
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
-                for(Button b : outputMessage.buttonList()){
+                for (Button b : outputMessage.buttonList()) {
                     InlineKeyboardButton button1 = new InlineKeyboardButton();
                     button1.setText(b.name());
                     button1.setCallbackData(b.data());
@@ -68,14 +66,12 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 message.setReplyMarkup(markupInline);
             }
 
-            // Send the message back to the user
-            // Отправляем сообщение пользователю
             try {
                 execute(message);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
         }
-}
+    }
 
 }

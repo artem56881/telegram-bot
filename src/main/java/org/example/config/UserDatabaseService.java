@@ -1,6 +1,4 @@
-package org.example;
-
-import org.example.config.DatabaseConnection;
+package org.example.config;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
