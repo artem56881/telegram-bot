@@ -1,4 +1,4 @@
-package org.example.notification;
+package org.example.services;
 
 import org.example.commands.AddCommand;
 

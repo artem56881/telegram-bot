@@ -1,7 +1,5 @@
 package org.example.entity;
 
-import org.example.Message;
-
 
 public class Notification {
 

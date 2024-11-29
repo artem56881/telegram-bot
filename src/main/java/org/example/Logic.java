@@ -7,8 +7,10 @@ import org.example.commands.AddCommand;
 import org.example.commands.ListCommand;
 import org.example.commands.RemoveCommand;
 
-import org.example.config.UserDatabaseService;
-import org.example.notification.NotificationService;
+import org.example.entity.Button;
+import org.example.entity.Message;
+import org.example.services.UserDatabaseService;
+import org.example.services.NotificationService;
 import org.example.ozon.ProductInfoCollector;
 import org.example.ozon.FetchHtml;
 
