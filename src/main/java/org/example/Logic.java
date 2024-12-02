@@ -27,7 +27,7 @@ public class Logic {
 
     private final Map<String, Message> commandMap = new HashMap<>();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 
     private final static Message help = new Message("""
@@ -102,6 +102,7 @@ public class Logic {
                 int productPrice = Integer.parseInt(productInfo.get("base_price"));
 
                 String result = addCommand.execute(productId, productName, productPrice);
+
 
                 userStates.put(userId, "DEFAULT");
                 return new Message(result);
@@ -184,6 +185,7 @@ public class Logic {
 
                     userStates.put(userId, "DEFAULT");
 
+
                     return new Message("Текущая цена товара: " + currentPrice + "₽");
                 } catch (Exception e) {
                     System.err.println("Ошибка при проверке цены: " + e.getMessage());
@@ -197,8 +199,7 @@ public class Logic {
 
         if (inputMessage.equals("/stop_notifications")) {
             stopPeriodicNotifications();
-            Message message = new Message("Периодические уведомления остановлены.");
-            return message;
+            return new Message("Периодические уведомления остановлены.");
         }
 
 
@@ -219,18 +220,21 @@ public class Logic {
 
 
     public void startPeriodicNotifications() {
-        // Запускаем задачу, которая будет выполняться каждые 10 минут (600 секунд)
+        if (scheduler.isShutdown()) {
+            scheduler = Executors.newScheduledThreadPool(1);
+        }
+        scheduler.isShutdown();
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 AddCommand add = new AddCommand();
                 NotificationService notify = new NotificationService(add);
                 notify.checkPriceUpdatesAndNotify();
-
             } catch (Exception e) {
                 System.err.println("Ошибка при отправке периодических уведомлений: " + e.getMessage());
             }
-        }, 0, 10, TimeUnit.MINUTES); // Начинаем сразу и повторяем каждые 10 минут
+        }, 0, 10, TimeUnit.MINUTES);
     }
+
 
     public void stopPeriodicNotifications() {
         if (!scheduler.isShutdown()) {
