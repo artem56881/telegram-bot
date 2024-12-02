@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -66,13 +67,20 @@ public class Logic {
 
 
     public Message handleStartCommand(long userId, String userName) {
-        UserDatabaseService userDatabaseService = new UserDatabaseService();
-        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
-        if (userAdded) {
-            return new Message("Спасибо, что пользуйтесь нашим ботом!");
-        } else {
-            return new Message("Мы вас уже запомнили");
-        }
+//        UserDatabaseService userDatabaseService = new UserDatabaseService();
+//        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
+        List<Button> buttons = List.of(
+                new Button("Добавить товар для отслеживания", "/add"),
+                new Button("Показать список отслеживаемых товаров", "/list"),
+                new Button("Удалить товар из списка отслеживания", "/remove"),
+                new Button("Помощь", "/help")
+        );
+        return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
+//        if (userAdded) {
+//            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
+//        } else {
+//            return new Message("Мы вас уже запомнили", buttons);
+//        }
     }
 
 
@@ -107,7 +115,11 @@ public class Logic {
                 userStates.put(userId, "DEFAULT");
                 return new Message(result);
             } else {
-                return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.");
+
+                List<Button> buttons = List.of(
+                        new Button("/add", "/add"));
+
+                return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.", buttons);
             }
         }
 
