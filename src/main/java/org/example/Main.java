@@ -11,28 +11,20 @@ public class Main {
 
         String token = System.getenv("TOKEN");
         String name = System.getenv("NAME");
-        String alitoken = System.getenv("ALITOKEN");
 
-        if(token == null) {
+        if (token == null) {
             System.out.println("no token assigned");
         }
-        if(name == null) {
+        if (name == null) {
             System.out.println("no name assigned");
-        }
-        if(alitoken == null) {
-            System.out.println("no alitoken assigned");
         }
 
         Logic logic = new Logic();
 
-//        DatabaseConnection databaseConnection = new DatabaseConnection();
-//        databaseConnection.createAllTable();
-
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             botsApi.registerBot(new MyTelegramBot(token, name, logic));
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (TelegramApiException _) {
         }
     }
 }
