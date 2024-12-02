@@ -170,7 +170,6 @@ public class Logic {
                     return new Message("Произошла ошибка при проверке цены. Убедитесь в правильности ссылки или попробуйте позже.");
                 }
             } else {
-                stopPeriodicNotifications();
                 return new Message("Введите корректную ссылку на товар.");
             }
         }
@@ -194,6 +193,12 @@ public class Logic {
             } else {
                 return new Message("Введите корректную ссылку на товар.");
             }
+        }
+
+        if (inputMessage.equals("/stop_notifications")) {
+            stopPeriodicNotifications();
+            Message message = new Message("Периодические уведомления остановлены.");
+            return message;
         }
 
 
@@ -228,7 +233,7 @@ public class Logic {
     }
 
     public void stopPeriodicNotifications() {
-        if (scheduler != null && !scheduler.isShutdown()) {
+        if (!scheduler.isShutdown()) {
             scheduler.shutdown();
         }
     }
