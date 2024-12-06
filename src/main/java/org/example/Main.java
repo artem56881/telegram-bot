@@ -11,6 +11,7 @@ public class Main {
 
         String token = System.getenv("TOKEN");
         String name = System.getenv("NAME");
+        String alitoken = System.getenv("ALITOKEN");
 
         if (token == null) {
             System.out.println("no token assigned");
@@ -18,8 +19,14 @@ public class Main {
         if (name == null) {
             System.out.println("no name assigned");
         }
+        if(alitoken == null) {
+            System.out.println("no alitoken assigned");
+        }
 
         Logic logic = new Logic();
+
+//        DatabaseConnection databaseConnection = new DatabaseConnection();
+//        databaseConnection.createAllTable();
 
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);

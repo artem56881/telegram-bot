@@ -1,18 +1,20 @@
 package org.example;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+import org.example.entity.Button;
+import org.example.entity.Message;
 import org.example.commands.AddCommand;
 import org.example.commands.ListCommand;
 import org.example.commands.RemoveCommand;
 
-import org.example.entity.Button;
-import org.example.entity.Message;
+
 import org.example.services.UserDatabaseService;
 import org.example.services.NotificationService;
 import org.example.ozon.ProductInfoCollector;
@@ -34,7 +36,7 @@ public class Logic {
     private final static Message help = new Message("""
             Бот отслеживает цены на выбранные вами товары на Ozon и отправляет уведомление, когда цена снижается до желаемого уровня.\s
 
-            Команды:
+            Команды:    
             /add - добавить товар для отслеживания
             /list - показать список отслеживаемых то`варов
             /remove - удалить товар из списка отслеживания
@@ -73,7 +75,8 @@ public class Logic {
                 new Button("Добавить товар для отслеживания", "/add"),
                 new Button("Показать список отслеживаемых товаров", "/list"),
                 new Button("Удалить товар из списка отслеживания", "/remove"),
-                new Button("Помощь", "/help")
+                new Button("Помощь", "/help"),
+                new Button("Проверить цену товара", "/check_price")
         );
         if (userAdded) {
             return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
@@ -101,7 +104,6 @@ public class Logic {
         AddCommand addCommand = new AddCommand();
         if ("AWAITING_PRODUCT_LINK".equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
-//                AddCommand addCommand = new AddCommand();
                 Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
                 Long productId = Long.valueOf(productInfo.get("item_id"));
