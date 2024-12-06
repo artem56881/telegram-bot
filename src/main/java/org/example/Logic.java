@@ -67,20 +67,19 @@ public class Logic {
 
 
     public Message handleStartCommand(long userId, String userName) {
-//        UserDatabaseService userDatabaseService = new UserDatabaseService();
-//        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
+        UserDatabaseService userDatabaseService = new UserDatabaseService();
+        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
         List<Button> buttons = List.of(
                 new Button("Добавить товар для отслеживания", "/add"),
                 new Button("Показать список отслеживаемых товаров", "/list"),
                 new Button("Удалить товар из списка отслеживания", "/remove"),
                 new Button("Помощь", "/help")
         );
-        return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
-//        if (userAdded) {
-//            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
-//        } else {
-//            return new Message("Мы вас уже запомнили", buttons);
-//        }
+        if (userAdded) {
+            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
+        } else {
+            return new Message("Мы вас уже запомнили", buttons);
+        }
     }
 
 
