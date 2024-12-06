@@ -58,11 +58,13 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
                 for (Button b : outputMessage.buttonList()) {
-                    InlineKeyboardButton button1 = new InlineKeyboardButton();
-                    button1.setText(b.name());
-                    button1.setCallbackData(b.data());
-                    row1.add(button1);
-                    rowsInline.add(row1);
+                    // Create a new row for each button
+                    List<InlineKeyboardButton> row = new ArrayList<>();
+                    InlineKeyboardButton button = new InlineKeyboardButton();
+                    button.setText(b.name());
+                    button.setCallbackData(b.data());
+                    row.add(button);
+                    rowsInline.add(row); // Add the row to rowsInline
                 }
                 markupInline.setKeyboard(rowsInline);
                 message.setReplyMarkup(markupInline);
