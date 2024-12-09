@@ -2,12 +2,13 @@ package org.example;
 
 import org.example.entity.Button;
 import org.example.entity.Message;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final String token;
     private final String name;
     private final Logic logic;
+
 
     public MyTelegramBot(String token, String name, Logic logic) {
         this.name = name;
@@ -39,32 +41,35 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            String messageText = update.getMessage().getText();
-            Long chatId = update.getMessage().getChatId();
+        String messageText = null;
+        Long chatId = null;
 
-
+        if (update.hasMessage() && update.getMessage().hasText()) { //проверка на то есть ли текст сообщения
+            messageText = update.getMessage().getText();
+            chatId = update.getMessage().getChatId();
+        } else if (update.hasCallbackQuery()) { //проверка на то есть ли callBackQuery в котором хранится data и chatId нажатой кнопки
+            CallbackQuery callbackQuery = update.getCallbackQuery();
+            messageText = callbackQuery.getData();
+            chatId = callbackQuery.getMessage().getChatId();
+        }
+        if (messageText != null && chatId != null) {
             SendMessage message = new SendMessage();
             message.setChatId(chatId.toString());
 
-            int userId = 0;
-            String userName = null;
-
             Message outputMessage = logic.processMessage(messageText, chatId);
             message.setText(outputMessage.text());
-            List<InlineKeyboardButton> row1 = new ArrayList<>();
             if (outputMessage.buttonList() != null) {
                 InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
 
                 for (Button b : outputMessage.buttonList()) {
-                    // Create a new row for each button
+                    // Создаем новый ряд для каждой кнопки
                     List<InlineKeyboardButton> row = new ArrayList<>();
                     InlineKeyboardButton button = new InlineKeyboardButton();
                     button.setText(b.name());
                     button.setCallbackData(b.data());
                     row.add(button);
-                    rowsInline.add(row); // Add the row to rowsInline
+                    rowsInline.add(row); // Добавляем ряд в "ряды линии"
                 }
                 markupInline.setKeyboard(rowsInline);
                 message.setReplyMarkup(markupInline);
@@ -77,5 +82,4 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             }
         }
     }
-
 }
