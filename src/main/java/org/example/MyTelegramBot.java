@@ -44,10 +44,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         String messageText = null;
         Long chatId = null;
 
-        if (update.hasMessage() && update.getMessage().hasText()) {
+        if (update.hasMessage() && update.getMessage().hasText()) { //проверка на то есть ли текст сообщения
             messageText = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-        } else if (update.hasCallbackQuery()) {
+        } else if (update.hasCallbackQuery()) { //проверка на то есть ли callBackQuery в котором хранится data и chatId нажатой кнопки
             CallbackQuery callbackQuery = update.getCallbackQuery();
             messageText = callbackQuery.getData();
             chatId = callbackQuery.getMessage().getChatId();
