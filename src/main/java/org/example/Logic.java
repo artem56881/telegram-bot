@@ -69,8 +69,8 @@ public class Logic {
 
 
     public Message handleStartCommand(long userId, String userName) {
-//        UserDatabaseService userDatabaseService = new UserDatabaseService();////////////////////////////////////////////
-//        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);////////////////////////////////////////////
+        UserDatabaseService userDatabaseService = new UserDatabaseService();
+        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
         List<Button> buttons = List.of(
                 new Button("Добавить товар для отслеживания", "/add"),
                 new Button("Показать список отслеживаемых товаров", "/list"),
@@ -79,12 +79,12 @@ public class Logic {
                 new Button("Проверить цену товара", "/check_price")
         );
 
-        return  new Message("kek", buttons);
-//        if (userAdded) {
-//            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);////////////////////////////////////////////
-//        } else {
-//            return new Message("Мы вас уже запомнили", buttons);
-//        }
+//        return  new Message("test without database", buttons);
+        if (userAdded) {
+            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
+        } else {
+            return new Message("Мы вас уже запомнили", buttons);
+        }
     }
 
 
@@ -94,8 +94,8 @@ public class Logic {
     public Message processMessage(String inputMessage, long userId) {
 
         if (inputMessage.equals("/start")) {
-//            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние пользователя////////////////////////////////////////////
-//            startPeriodicNotifications();////////////////////////////////////////////
+            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние пользователя
+            startPeriodicNotifications();
             return handleStartCommand(userId, "default username");
         }
 
@@ -257,8 +257,4 @@ public class Logic {
         }
     }
 
-
-    public Message processCallback(String callbackData, Long chatId) {
-        return new Message("button was kek'd" + callbackData);
-    }
 }
