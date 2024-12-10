@@ -78,6 +78,8 @@ public class Logic {
                 new Button("Помощь", "/help"),
                 new Button("Проверить цену товара", "/check_price")
         );
+
+//        return  new Message("test without database", buttons);
         if (userAdded) {
             return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
         } else {
@@ -254,6 +256,5 @@ public class Logic {
             scheduler.shutdown();
         }
     }
-
 
 }
