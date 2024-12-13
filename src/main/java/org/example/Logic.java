@@ -1,6 +1,7 @@
 package org.example;
 
 //import java.util.ArrayList;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -10,11 +11,13 @@ import java.util.regex.Pattern;
 
 import org.example.entity.Button;
 import org.example.entity.Message;
+import org.example.entity.UserState;
 import org.example.commands.AddCommand;
 import org.example.commands.ListCommand;
 import org.example.commands.RemoveCommand;
 
 
+import org.example.entity.UserState;
 import org.example.services.UserDatabaseService;
 import org.example.services.NotificationService;
 import org.example.ozon.ProductInfoCollector;
@@ -94,17 +97,19 @@ public class Logic {
     public Message processMessage(String inputMessage, long userId) {
 
         if (inputMessage.equals("/start")) {
-            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние пользователя
+            String default_state = UserState.DEFAULT.getUserState();
+            userStates.put(userId, default_state); // Сбрасываем состояние пользователя
             startPeriodicNotifications();
             return handleStartCommand(userId, "default username");
         }
 
         if (inputMessage.equals("/add")) {
-            userStates.put(userId, "AWAITING_PRODUCT_LINK"); // Устанавливаем состояние ожидания ссылки
+            String await_link = UserState.AWAITING_PRODUCT_LINK.getUserState();
+            userStates.put(userId, await_link); // Устанавливаем состояние ожидания ссылки
             return new Message("Введите ссылку на товар для отслеживания:");
         }
         AddCommand addCommand = new AddCommand();
-        if ("AWAITING_PRODUCT_LINK".equals(userStates.get(userId))) {
+        if (UserState.AWAITING_PRODUCT_LINK.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
                 Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
@@ -115,7 +120,7 @@ public class Logic {
                 String result = addCommand.execute(productId, productName, productPrice);
 
 
-                userStates.put(userId, "DEFAULT");
+                userStates.put(userId, UserState.DEFAULT.getUserState());
                 return new Message(result);
             } else {
 
@@ -127,11 +132,12 @@ public class Logic {
         }
 
         if (inputMessage.equals("/remove")) {
-            userStates.put(userId, "AWAITING_PRODUCT_LINK_FOR_REMOVAL");
+            String remove_link = UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState();
+            userStates.put(userId, remove_link);
             return new Message("Введите ссылку на товар, который хотите удалить:");
         }
 
-        if ("AWAITING_PRODUCT_LINK_FOR_REMOVAL".equals(userStates.get(userId))) {
+        if (UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
                 // Извлечение ID товара из ссылки
                 Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
@@ -155,7 +161,7 @@ public class Logic {
         }
 
         if (inputMessage.equals("/list")) {
-            userStates.put(userId, "DEFAULT"); // Сбрасываем состояние
+            userStates.put(userId, UserState.DEFAULT.getUserState())    ; // Сбрасываем состояние
             ListCommand listCommand = new ListCommand(new HashMap<>());
             String result = listCommand.execute();
             return new Message(result);
@@ -163,11 +169,11 @@ public class Logic {
 
         if (inputMessage.equals("/check_price")) {
             // Установить состояние ожидания ссылки от пользователя
-            userStates.put(userId, "AWAITING_PRODUCT_LINK_FOR_CHECK");
+            userStates.put(userId, UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState())    ;
             return new Message("Введите ссылку на товар, цену которого вы хотите проверить:");
         }
 
-        if ("AWAITING_PRODUCT_LINK_FOR_CHECK".equals(userStates.get(userId))) {
+        if (UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
                 try {
                     Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
@@ -190,7 +196,7 @@ public class Logic {
             }
         }
 
-        if ("AWAITING_PRODUCT_LINK_FOR_CHECK".equals(userStates.get(userId))) {
+        if (UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
                 try {
                     Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
@@ -198,13 +204,13 @@ public class Logic {
                     String productName = productInfo.get("item_name");
                     int currentPrice = Integer.parseInt(productInfo.get("base_price"));
 
-                    userStates.put(userId, "DEFAULT");
+                    userStates.put(userId, UserState.DEFAULT.getUserState());
 
 
                     return new Message("Текущая цена товара: " + currentPrice + "₽");
                 } catch (Exception e) {
                     System.err.println("Ошибка при проверке цены: " + e.getMessage());
-                    userStates.put(userId, "DEFAULT");
+                    userStates.put(userId, UserState.DEFAULT.getUserState());
                     return new Message("Произошла ошибка при проверке цены. Убедитесь в правильности ссылки или попробуйте позже.");
                 }
             } else {
