@@ -1,13 +1,10 @@
 package org.example;
 
-//import java.util.ArrayList;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 import org.example.entity.Button;
 import org.example.entity.Message;
@@ -15,9 +12,6 @@ import org.example.entity.UserState;
 import org.example.commands.AddCommand;
 import org.example.commands.ListCommand;
 import org.example.commands.RemoveCommand;
-
-
-import org.example.entity.UserState;
 import org.example.services.UserDatabaseService;
 import org.example.services.NotificationService;
 import org.example.ozon.ProductInfoCollector;
@@ -30,34 +24,25 @@ import java.util.Map;
 public class Logic {
 
     private final Map<Long, String> userStates = new HashMap<>();
-
     private final Map<String, Message> commandMap = new HashMap<>();
-
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
 
     private final static Message help = new Message("""
             Бот отслеживает цены на выбранные вами товары на Ozon и отправляет уведомление, когда цена снижается до желаемого уровня.\s
 
-            Команды:    
+            Команды:
             /add - добавить товар для отслеживания
-            /list - показать список отслеживаемых то`варов
+            /list - показать список отслеживаемых товаров
             /remove - удалить товар из списка отслеживания
             /help - помощь
             /check_price - вывести цену товара по ссылке""",
             List.of(new Button("start", "start")));
 
-
     public Logic() {
-
         commandMap.put("/start", help);
-
         commandMap.put("/add", new Message("Введите ссылку на товар"));
-
         commandMap.put("/list", new Message("Список отслеживаемых товаров:"));
-
         commandMap.put("/remove", new Message("Введите ID товара для удаления из списка отслеживания."));
-
         commandMap.put("/help", new Message("""
                 Список доступных команд:
                 /start - начать работу бота
@@ -66,10 +51,8 @@ public class Logic {
                 /remove - удалить товар из списка отслеживания
                 /help - помощь
                 /check_price - вывести цену товара по ссылке"""));
-
         commandMap.put("/tst", new Message("FGDFG"));
     }
-
 
     public Message handleStartCommand(long userId, String userName) {
         UserDatabaseService userDatabaseService = new UserDatabaseService();
@@ -82,7 +65,6 @@ public class Logic {
                 new Button("Проверить цену товара", "/check_price")
         );
 
-//        return  new Message("test without database", buttons);
         if (userAdded) {
             return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
         } else {
@@ -90,12 +72,7 @@ public class Logic {
         }
     }
 
-
-    /**
-     * @return Добавил сохранение состояния пользователя в userStates
-     */
     public Message processMessage(String inputMessage, long userId) {
-
         if (inputMessage.equals("/start")) {
             String default_state = UserState.DEFAULT.getUserState();
             userStates.put(userId, default_state); // Сбрасываем состояние пользователя
@@ -108,6 +85,7 @@ public class Logic {
             userStates.put(userId, await_link); // Устанавливаем состояние ожидания ссылки
             return new Message("Введите ссылку на товар для отслеживания:");
         }
+
         AddCommand addCommand = new AddCommand();
         if (UserState.AWAITING_PRODUCT_LINK.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
@@ -117,16 +95,13 @@ public class Logic {
                 String productName = productInfo.get("item_name");
                 int productPrice = Integer.parseInt(productInfo.get("base_price"));
 
-                String result = addCommand.execute(productId, productName, productPrice);
-
+                String result = addCommand.execute(userId, productId, productName, productPrice);
 
                 userStates.put(userId, UserState.DEFAULT.getUserState());
                 return new Message(result);
             } else {
-
                 List<Button> buttons = List.of(
                         new Button("/add", "/add"));
-
                 return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.", buttons);
             }
         }
@@ -147,10 +122,10 @@ public class Logic {
                 if (productId != null) {
                     RemoveCommand removeCommand = new RemoveCommand();
                     //удаляем товар по ID
-                    String result = removeCommand.execute(Long.valueOf(productId));
+                    String result = removeCommand.execute(userId, Long.valueOf(productId));
 
                     // Сбрасываем состояние пользователя
-                    userStates.put(userId, "DEFAULT");
+                    userStates.put(userId, UserState.DEFAULT.getUserState());
                     return new Message(result);
                 } else {
                     return new Message("Не удалось найти товар по указанной ссылке.");
@@ -161,15 +136,15 @@ public class Logic {
         }
 
         if (inputMessage.equals("/list")) {
-            userStates.put(userId, UserState.DEFAULT.getUserState())    ; // Сбрасываем состояние
+            userStates.put(userId, UserState.DEFAULT.getUserState()); // Сбрасываем состояние
             ListCommand listCommand = new ListCommand(new HashMap<>());
-            String result = listCommand.execute();
+            String result = listCommand.execute(userId);
             return new Message(result);
         }
 
         if (inputMessage.equals("/check_price")) {
             // Установить состояние ожидания ссылки от пользователя
-            userStates.put(userId, UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState())    ;
+            userStates.put(userId, UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState());
             return new Message("Введите ссылку на товар, цену которого вы хотите проверить:");
         }
 
@@ -184,29 +159,7 @@ public class Logic {
                     NotificationService notificationService = new NotificationService(addCommand);
                     notificationService.checkPriceUpdatesAndNotify(); // Проверяем обновления цен и отправляем уведомления
 
-                    userStates.put(userId, "DEFAULT");
-                    return new Message("Текущая цена товара: " + currentPrice + "₽");
-                } catch (Exception e) {
-                    System.err.println("Ошибка при проверке цены: " + e.getMessage());
-                    userStates.put(userId, "DEFAULT");
-                    return new Message("Произошла ошибка при проверке цены. Убедитесь в правильности ссылки или попробуйте позже.");
-                }
-            } else {
-                return new Message("Введите корректную ссылку на товар.");
-            }
-        }
-
-        if (UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState().equals(userStates.get(userId))) {
-            if (isValidUrl(inputMessage)) {
-                try {
-                    Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
-
-                    String productName = productInfo.get("item_name");
-                    int currentPrice = Integer.parseInt(productInfo.get("base_price"));
-
                     userStates.put(userId, UserState.DEFAULT.getUserState());
-
-
                     return new Message("Текущая цена товара: " + currentPrice + "₽");
                 } catch (Exception e) {
                     System.err.println("Ошибка при проверке цены: " + e.getMessage());
@@ -223,14 +176,12 @@ public class Logic {
             return new Message("Периодические уведомления остановлены.");
         }
 
-
         if (commandMap.containsKey(inputMessage)) {
             return commandMap.get(inputMessage);
         }
 
         return new Message("Неизвестная команда. Используйте /help для списка доступных команд.");
     }
-
 
     private boolean isValidUrl(String url) {
         String regex = "https?://\\S+";
@@ -239,12 +190,10 @@ public class Logic {
         return matcher.matches();
     }
 
-
     public void startPeriodicNotifications() {
         if (scheduler.isShutdown()) {
             scheduler = Executors.newScheduledThreadPool(1);
         }
-        scheduler.isShutdown();
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 AddCommand add = new AddCommand();
@@ -256,11 +205,9 @@ public class Logic {
         }, 0, 10, TimeUnit.MINUTES);
     }
 
-
     public void stopPeriodicNotifications() {
         if (!scheduler.isShutdown()) {
             scheduler.shutdown();
         }
     }
-
 }

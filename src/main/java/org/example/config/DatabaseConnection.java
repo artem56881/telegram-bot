@@ -7,7 +7,7 @@ import java.sql.Statement;
 
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:postgresql://localhost:5432/TelegramBot";
+    private static final String URL = "jdbc:postgresql://localhost:5432/telegrambot";
     private static final String USER = "postgres";
     private static final String PASSWORD = "Andrew80t7!";
 
