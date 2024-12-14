@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.entity.Button;
 import org.example.entity.Message;
+import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -41,13 +42,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        
         String messageText = null;
         Long chatId = null;
 
         if (update.hasMessage() && update.getMessage().hasText()) { //проверка на то есть ли текст сообщения
             messageText = update.getMessage().getText();
             chatId = update.getMessage().getChatId();
-        } else if (update.hasCallbackQuery()) { //проверка на то есть ли callBackQuery в котором хранится data и chatId нажатой кнопки
+        } else if (update.hasCallbackQuery()) { 
             CallbackQuery callbackQuery = update.getCallbackQuery();
             messageText = callbackQuery.getData();
             chatId = callbackQuery.getMessage().getChatId();
@@ -59,27 +61,32 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             Message outputMessage = logic.processMessage(messageText, chatId);
             message.setText(outputMessage.text());
             if (outputMessage.buttonList() != null) {
-                InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
-
-                for (Button b : outputMessage.buttonList()) {
-                    // Создаем новый ряд для каждой кнопки
-                    List<InlineKeyboardButton> row = new ArrayList<>();
-                    InlineKeyboardButton button = new InlineKeyboardButton();
-                    button.setText(b.name());
-                    button.setCallbackData(b.data());
-                    row.add(button);
-                    rowsInline.add(row); // Добавляем ряд в "ряды линии"
-                }
-                markupInline.setKeyboard(rowsInline);
+                InlineKeyboardMarkup markupInline = getInlineKeyboardMarkup(outputMessage);
                 message.setReplyMarkup(markupInline);
             }
 
             try {
                 execute(message);
             } catch (TelegramApiException e) {
-                e.printStackTrace();
+                System.out.println("Error with TelegramAPI");
             }
         }
+    }
+
+    private static @NotNull InlineKeyboardMarkup getInlineKeyboardMarkup(Message outputMessage) {
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+
+        for (Button b : outputMessage.buttonList()) {
+            
+            List<InlineKeyboardButton> row = new ArrayList<>();
+            InlineKeyboardButton button = new InlineKeyboardButton();
+            button.setText(b.name());
+            button.setCallbackData(b.data());
+            row.add(button);
+            rowsInline.add(row);
+        }
+        markupInline.setKeyboard(rowsInline);
+        return markupInline;
     }
 }
