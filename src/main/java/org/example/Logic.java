@@ -114,7 +114,7 @@ public class Logic {
 
         if (UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState().equals(userStates.get(userId))) {
             if (isValidUrl(inputMessage)) {
-                // Извлечение ID товара из ссылки
+                // Извлечение ID товара из ссылки.
                 Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
                 String productId = productInfo.get("item_id");
