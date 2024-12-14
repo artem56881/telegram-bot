@@ -2,14 +2,13 @@ package org.example.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.example.config.DatabaseConnection;
 
 public class RemoveCommand {
     // SQL-запросы
-    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND id = ?";
+    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND product_id = ?";
 
     public String execute(Long userId, Long productId) {
         try {

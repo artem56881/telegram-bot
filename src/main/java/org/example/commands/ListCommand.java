@@ -37,7 +37,7 @@ public class ListCommand {
 
     private List<String> getAllProductsFromDatabase(Long userId) throws SQLException {
         List<String> products = new ArrayList<>();
-        DatabaseConnection databaseConnection = new DatabaseConnection();
+//        DatabaseConnection databaseConnection = new DatabaseConnection();
 
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCTS_SQL)) {
