@@ -92,7 +92,7 @@ public class Logic {
                 userStates.put(userId, default_state); // Сбрасываем состояние пользователя
                 List<Button> buttons = List.of(
                         new Button("/add", "/add"));
-                return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.", buttons);
+                return new Message("Некоректная ссылка, нажмите /add чтобы попробовать снова", buttons);
 
             }
             Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
@@ -150,25 +150,23 @@ public class Logic {
         }
 
         if (UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState().equals(userStates.get(userId))) {
-            if (isValidUrl(inputMessage)) {
-                try {
-                    Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
-                    String productName = productInfo.get("item_name");
-                    int currentPrice = Integer.parseInt(productInfo.get("base_price"));
+            List<Button> buttons = List.of(
+                    new Button("Проверить цену", "/check_price"));
+            if (!isValidUrl(inputMessage)) { //проверка валидности ссылки
+                userStates.put(userId, default_state); // Сбрасываем состояние пользователя
+                return new Message("Некоректная ссылка на товар, Нажмите /check_price чтобы попробовать снова", buttons);
 
-                    // Создаем экземпляр NotificationService и проверяем цены
-                    NotificationService notificationService = new NotificationService(addCommand);
-                    notificationService.checkPriceUpdatesAndNotify(); // Проверяем обновления цен и отправляем уведомления
+            }
+            try {
+                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
+                int currentPrice = Integer.parseInt(productInfo.get("base_price"));
 
-                    userStates.put(userId, UserState.DEFAULT.getUserState());
-                    return new Message("Текущая цена товара: " + currentPrice + "₽");
-                } catch (Exception e) {
-                    System.err.println("Ошибка при проверке цены: " + e.getMessage());
-                    userStates.put(userId, UserState.DEFAULT.getUserState());
-                    return new Message("Произошла ошибка при проверке цены. Убедитесь в правильности ссылки или попробуйте позже.");
-                }
-            } else {
-                return new Message("Введите корректную ссылку на товар.");
+                userStates.put(userId, UserState.DEFAULT.getUserState());
+                return new Message("Текущая цена товара: " + currentPrice + "₽");
+            } catch (Exception e) {
+                System.err.println("Ошибка при проверке цены: " + e.getMessage());
+                userStates.put(userId, UserState.DEFAULT.getUserState());
+                return new Message("Произошла ошибка при проверке цены. Убедитесь в правильности ссылки или попробуйте позже.", buttons);
             }
         }
 

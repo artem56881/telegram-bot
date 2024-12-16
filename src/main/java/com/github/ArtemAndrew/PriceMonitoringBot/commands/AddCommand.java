@@ -16,7 +16,7 @@ public class AddCommand {
     private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (user_id, product_id, name, price) VALUES (?, ?, ?, ?)";
     private static final String CHECK_PRODUCT_SQL = "SELECT COUNT(*) FROM products WHERE user_id = ? AND product_id = ?";
     private static final String SELECT_TRACKED_PRODUCTS_SQL = "SELECT user_id, product_id, name, price FROM products WHERE user_id = ?";
-    private static final String UPDATE_PRODUCT_PRICE_SQL = "UPDATE products SET price = ? WHERE user_id = ? AND product_id = ?";
+    private static final String UPDATE_PRODUCT_PRICE_SQL = "UPDATE products SET price = ? WHERE product_id = ?";
 
     public String execute(Long userId, Long productId, String productName, int price) {
         try {
@@ -85,13 +85,33 @@ public class AddCommand {
         return trackedProducts;
     }
 
-    public void updateProductPrice(Long userId, Long productId, int newPrice) throws SQLException {
+    public List<Map<String, Object>> getAllTrackedProducts() throws SQLException {
+        List<Map<String, Object>> trackedProducts = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM PRODUCTS")) {
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    Map<String, Object> product = new HashMap<>();
+                    product.put("user_id", resultSet.getLong("user_id"));
+                    product.put("product_id", resultSet.getLong("product_id"));
+                    product.put("name", resultSet.getString("name"));
+                    product.put("price", resultSet.getInt("price"));
+
+                    trackedProducts.add(product);
+                }
+            }
+        }
+        return trackedProducts;
+    }
+
+    public void updateProductPrice(Long productId, int newPrice) throws SQLException {
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_PRODUCT_PRICE_SQL)) {
 
             preparedStatement.setInt(1, newPrice);
-            preparedStatement.setLong(2, userId);
-            preparedStatement.setLong(3, productId);
+            preparedStatement.setLong(2, productId);
             int rowsAffected = preparedStatement.executeUpdate();
 
             if (rowsAffected > 0) {
@@ -101,4 +121,5 @@ public class AddCommand {
             }
         }
     }
+
 }

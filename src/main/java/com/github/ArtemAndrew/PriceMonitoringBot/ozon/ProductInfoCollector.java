@@ -17,6 +17,7 @@ public class ProductInfoCollector {
             Document document = Jsoup.parse(htmlContent);
 
             Element scriptElement = document.selectFirst("script[type=\"application/ld+json\"]");
+            assert scriptElement != null;
             System.out.println(scriptElement.html());
 
             String ldJson = scriptElement.html();

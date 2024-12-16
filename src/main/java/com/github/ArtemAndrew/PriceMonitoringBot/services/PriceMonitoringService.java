@@ -7,7 +7,6 @@ import com.github.ArtemAndrew.PriceMonitoringBot.ozon.FetchHtml;
 import java.util.List;
 import java.util.Map;
 
-
 public class PriceMonitoringService {
 
     private final AddCommand addCommand;
@@ -23,27 +22,25 @@ public class PriceMonitoringService {
      */
     public List<Map<String, Object>> checkAndUpdatePrices() {
         try {
-            long testUsrid = 123;
-            List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts(testUsrid);
+            List<Map<String, Object>> trackedProducts = addCommand.getAllTrackedProducts();
 
             for (Map<String, Object> product : trackedProducts) {
-                String productUrl = (String) product.get("product_url");
+                Long productId = (Long) product.get("product_id");
+                String productName = (String) product.get("name");
                 int desiredPrice = (int) product.get("desired_price");
-                int currentPrice = (int) product.get("current_price");
+                int currentPrice = (int) product.get("price");
 
-                // Получение обновленной информации о товаре
-                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(productUrl));
+                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(productName));
                 int updatedPrice = Integer.parseInt(productInfo.get("base_price"));
 
-//                if (updatedPrice != currentPrice) {
-//                    addCommand.updateProductPrice(productUrl, updatedPrice);
-//
-//                    // Обновление данных в коллекции для использования в дальнейшем
-//                    product.put("current_price", updatedPrice;
-//                    product.put("price_dropped", updatedPrice <= desiredPrice); // Флаг снижения цены
-//                }
+                if (updatedPrice != currentPrice) {
+                    addCommand.updateProductPrice(productId, updatedPrice);
+
+                    product.put("price", updatedPrice);
+                    product.put("price_dropped", updatedPrice <= desiredPrice); // Флаг снижения цены
+                }
             }
-            return trackedProducts; // Возвращаем список обновленных товаров
+            return trackedProducts;
         } catch (Exception e) {
             System.err.println("Ошибка при проверке цен: " + e.getMessage());
             throw new RuntimeException("Ошибка проверки цен", e);
