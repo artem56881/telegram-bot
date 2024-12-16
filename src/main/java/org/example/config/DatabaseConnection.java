@@ -53,7 +53,7 @@ public class DatabaseConnection {
                     stmt.executeUpdate(sql1);
                     stmt.executeUpdate(sql2);
                     stmt.executeUpdate(sql3);
-                    System.out.println("Таблица Users успешно создана.");
+                    System.out.println("Таблицы успешно созданы или уже существуют.");
                 }
             } else {
                 System.out.println("Не удалось создать таблицу: соединение с базой данных не установлено.");

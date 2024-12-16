@@ -73,8 +73,8 @@ public class Logic {
     }
 
     public Message processMessage(String inputMessage, long userId) {
+        String default_state = UserState.DEFAULT.getUserState();
         if (inputMessage.equals("/start")) {
-            String default_state = UserState.DEFAULT.getUserState();
             userStates.put(userId, default_state); // Сбрасываем состояние пользователя
             startPeriodicNotifications();
             return handleStartCommand(userId, "default username");
@@ -88,22 +88,23 @@ public class Logic {
 
         AddCommand addCommand = new AddCommand();
         if (UserState.AWAITING_PRODUCT_LINK.getUserState().equals(userStates.get(userId))) {
-            if (isValidUrl(inputMessage)) {
-                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
-
-                Long productId = Long.valueOf(productInfo.get("item_id"));
-                String productName = productInfo.get("item_name");
-                int productPrice = Integer.parseInt(productInfo.get("base_price"));
-
-                String result = addCommand.execute(userId, productId, productName, productPrice);
-
-                userStates.put(userId, UserState.DEFAULT.getUserState());
-                return new Message(result);
-            } else {
+            if (!isValidUrl(inputMessage)) { //проверка валидности ссылки
+                userStates.put(userId, default_state); // Сбрасываем состояние пользователя
                 List<Button> buttons = List.of(
                         new Button("/add", "/add"));
                 return new Message("Введите корректную ссылку на товар или используйте /add, чтобы попробовать снова.", buttons);
+
             }
+            Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
+
+            Long productId = Long.valueOf(productInfo.get("item_id"));
+            String productName = productInfo.get("item_name");
+            int productPrice = Integer.parseInt(productInfo.get("base_price"));
+
+            String result = addCommand.execute(userId, productId, productName, productPrice);
+
+            userStates.put(userId, UserState.DEFAULT.getUserState());
+            return new Message(result);
         }
 
         if (inputMessage.equals("/remove")) {
