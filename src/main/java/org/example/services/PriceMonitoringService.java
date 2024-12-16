@@ -23,8 +23,8 @@ public class PriceMonitoringService {
      */
     public List<Map<String, Object>> checkAndUpdatePrices() {
         try {
-
-            List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts();
+            long testUsrid = 123;
+            List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts(testUsrid);
 
             for (Map<String, Object> product : trackedProducts) {
                 String productUrl = (String) product.get("product_url");
@@ -35,13 +35,13 @@ public class PriceMonitoringService {
                 Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(productUrl));
                 int updatedPrice = Integer.parseInt(productInfo.get("base_price"));
 
-                if (updatedPrice != currentPrice) {
-                    addCommand.updateProductPrice(productUrl, updatedPrice);
-
-                    // Обновление данных в коллекции для использования в дальнейшем
-                    product.put("current_price", updatedPrice);
-                    product.put("price_dropped", updatedPrice <= desiredPrice); // Флаг снижения цены
-                }
+//                if (updatedPrice != currentPrice) {
+//                    addCommand.updateProductPrice(productUrl, updatedPrice);
+//
+//                    // Обновление данных в коллекции для использования в дальнейшем
+//                    product.put("current_price", updatedPrice;/////////////////////////////////TEST COMMENT
+//                    product.put("price_dropped", updatedPrice <= desiredPrice); // Флаг снижения цены
+//                }
             }
             return trackedProducts; // Возвращаем список обновленных товаров
         } catch (Exception e) {

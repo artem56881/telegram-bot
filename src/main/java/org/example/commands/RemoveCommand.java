@@ -2,20 +2,18 @@ package org.example.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.example.config.DatabaseConnection;
 
 public class RemoveCommand {
     // SQL-запросы
-    private static final String GET_PRODUCT_ID_SQL = "SELECT id FROM products WHERE name = ?";
-    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE id = ?";
+    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND product_id = ?";
 
-    public String execute(Long productId) {
+    public String execute(Long userId, Long productId) {
         try {
             if (productId != null) {
-                deleteProductFromDatabase(productId);
+                deleteProductFromDatabase(userId, productId);
                 return "Товар успешно удален из базы данных.";
             } else {
                 return "Товар с указанной ссылкой не найден.";
@@ -26,11 +24,12 @@ public class RemoveCommand {
         }
     }
 
-    private void deleteProductFromDatabase(Long productId) throws SQLException {
+    private void deleteProductFromDatabase(Long userId, Long productId) throws SQLException {
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PRODUCT_SQL)) {
 
-            preparedStatement.setLong(1, productId);
+            preparedStatement.setLong(1, userId);
+            preparedStatement.setLong(2, productId);
             int rowsAffected = preparedStatement.executeUpdate();
 
             if (rowsAffected > 0) {

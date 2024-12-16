@@ -26,7 +26,8 @@ public class NotificationService {
      */
     private void sendPeriodicNotifications() {
         try {
-            List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts();
+            long testUsrid = 123;
+            List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts(testUsrid);
 
             for (Map<String, Object> product : trackedProducts) {
                 long userId = (long) product.get("user_id");

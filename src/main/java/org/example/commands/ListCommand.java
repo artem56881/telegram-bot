@@ -9,22 +9,21 @@ import java.util.HashMap;
 import java.util.List;
 import org.example.config.DatabaseConnection;
 
-
 public class ListCommand {
     private HashMap<String, String> trackedProducts;
 
-    // SQL-запрос для получения всех товаров из базы данных
-    private static final String SELECT_ALL_PRODUCTS_SQL = "SELECT id, name, price FROM products";
+    // SQL-запрос для получения всех товаров из базы данных для конкретного пользователя
+    private static final String SELECT_ALL_PRODUCTS_SQL = "SELECT id, name, price FROM products WHERE user_id = ?";
 
     public ListCommand(HashMap<String, String> trackedProducts) {
         this.trackedProducts = trackedProducts;
     }
 
-    public String execute() {
+    public String execute(Long userId) {
         List<String> productsList = new ArrayList<>();
 
         try {
-            productsList = getAllProductsFromDatabase();
+            productsList = getAllProductsFromDatabase(userId);
             if (productsList.isEmpty()) {
                 return "Нет товаров для отслеживания.";
             } else {
@@ -36,13 +35,14 @@ public class ListCommand {
         }
     }
 
-    private List<String> getAllProductsFromDatabase() throws SQLException {
+    private List<String> getAllProductsFromDatabase(Long userId) throws SQLException {
         List<String> products = new ArrayList<>();
-        DatabaseConnection databaseConnection = new DatabaseConnection();
+//        DatabaseConnection databaseConnection = new DatabaseConnection();
 
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCTS_SQL)) {
 
+            preparedStatement.setLong(1, userId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
