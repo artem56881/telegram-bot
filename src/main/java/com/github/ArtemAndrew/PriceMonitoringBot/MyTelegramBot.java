@@ -40,6 +40,20 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
+    public void sendNotification(String chatId, String text){
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(text);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
     @Override
     public void onUpdateReceived(Update update) {
         

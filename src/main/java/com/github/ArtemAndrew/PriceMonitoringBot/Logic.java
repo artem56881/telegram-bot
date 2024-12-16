@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Logic {
-
+    private MyTelegramBot tgBot = null;
     private final Map<Long, String> userStates = new HashMap<>();
     private final Map<String, Message> commandMap = new HashMap<>();
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -52,6 +52,10 @@ public class Logic {
                 /help - помощь
                 /check_price - вывести цену товара по ссылке"""));
         commandMap.put("/tst", new Message("FGDFG"));
+    }
+
+    public void setTelegranBot(MyTelegramBot bot){
+        this.tgBot = bot;
     }
 
     public Message handleStartCommand() {
@@ -193,7 +197,7 @@ public class Logic {
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 AddCommand add = new AddCommand();
-                NotificationService notify = new NotificationService(add);
+                NotificationService notify = new NotificationService(add, tgBot);
                 notify.checkPriceUpdatesAndNotify();
             } catch (Exception e) {
                 System.err.println("Ошибка при отправке периодических уведомлений: " + e.getMessage());
