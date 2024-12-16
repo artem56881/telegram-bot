@@ -14,11 +14,11 @@ public class ListCommand {
     // SQL-запрос для получения всех товаров из базы данных для конкретного пользователя
     private static final String SELECT_ALL_PRODUCTS_SQL = "SELECT id, name, price FROM products WHERE user_id = ?";
 
-    public ListCommand(HashMap<String, String> trackedProducts) {
+    public ListCommand() {
     }
 
-    public String execute(Long userId) {
-        List<String> productsList = new ArrayList<>();
+    public String execute(String userId) {
+        List<String> productsList;
 
         try {
             productsList = getAllProductsFromDatabase(userId);
@@ -33,20 +33,19 @@ public class ListCommand {
         }
     }
 
-    private List<String> getAllProductsFromDatabase(Long userId) throws SQLException {
+    private List<String> getAllProductsFromDatabase(String userId) throws SQLException {
         List<String> products = new ArrayList<>();
-//        DatabaseConnection databaseConnection = new DatabaseConnection();
 
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_PRODUCTS_SQL)) {
 
-            preparedStatement.setLong(1, userId);
+            preparedStatement.setString(1, userId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 String productId = resultSet.getString("id");
                 String productName = resultSet.getString("name");
-                double productPrice = resultSet.getDouble("price");
+                int productPrice = resultSet.getInt("price");
 
                 // Добавляем продукт в список
                 products.add("ID: " + productId + ", Название: " + productName + ", Цена: " + productPrice);

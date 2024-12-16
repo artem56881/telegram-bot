@@ -23,7 +23,7 @@ public class NotificationService {
      */
     private void sendPeriodicNotifications() {
         try {
-            long testUsrid = 123;
+            String testUsrid = "asdasd";
             List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts(testUsrid);
 
             for (Map<String, Object> product : trackedProducts) {

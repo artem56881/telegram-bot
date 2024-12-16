@@ -101,7 +101,7 @@ public class Logic {
             String productName = productInfo.get("item_name");
             int productPrice = Integer.parseInt(productInfo.get("base_price"));
 
-            String result = addCommand.execute(userId, productId, productName, productPrice);
+            String result = addCommand.execute(Long.toString(userId), productId, productName, productPrice);
 
             userStates.put(userId, UserState.DEFAULT.getUserState());
             return new Message(result);
@@ -138,8 +138,8 @@ public class Logic {
 
         if (inputMessage.equals("/list")) {
             userStates.put(userId, UserState.DEFAULT.getUserState()); // Сбрасываем состояние
-            ListCommand listCommand = new ListCommand(new HashMap<>());
-            String result = listCommand.execute(userId);
+            ListCommand listCommand = new ListCommand();
+            String result = listCommand.execute(Long.toString(userId));
             return new Message(result);
         }
 

@@ -33,10 +33,12 @@ public class DatabaseConnection {
                 );""";
 
         String sql2 = """
-                CREATE TABLE IF NOT EXISTS Products (
+                CREATE TABLE IF NOT EXISTS products (
                 id SERIAL PRIMARY KEY, 
                 name VARCHAR(50) NOT NULL, 
                 price INTEGER NOT NULL
+                user_id VARCHAR(50) NOT NULL
+                product_id INTEGER NOT NULL
                 );""";
 
         String sql3 = """
