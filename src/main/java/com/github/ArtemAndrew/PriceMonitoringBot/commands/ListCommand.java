@@ -1,4 +1,4 @@
-package org.example.commands;
+package com.github.ArtemAndrew.PriceMonitoringBot.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,16 +7,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import org.example.config.DatabaseConnection;
+import com.github.ArtemAndrew.PriceMonitoringBot.config.DatabaseConnection;
 
 public class ListCommand {
-    private HashMap<String, String> trackedProducts;
 
     // SQL-запрос для получения всех товаров из базы данных для конкретного пользователя
     private static final String SELECT_ALL_PRODUCTS_SQL = "SELECT id, name, price FROM products WHERE user_id = ?";
 
     public ListCommand(HashMap<String, String> trackedProducts) {
-        this.trackedProducts = trackedProducts;
     }
 
     public String execute(Long userId) {

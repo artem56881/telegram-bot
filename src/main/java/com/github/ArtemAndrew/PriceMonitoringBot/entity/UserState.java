@@ -1,6 +1,4 @@
-package org.example.entity;
-
-import org.python.antlr.ast.Str;
+package com.github.ArtemAndrew.PriceMonitoringBot.entity;
 
 public enum UserState {
     DEFAULT("Дефолтное состояние"),
@@ -8,7 +6,7 @@ public enum UserState {
     AWAITING_PRODUCT_LINK ("Ждёт ссылку для добавления товара"),
     AWAITING_PRODUCT_LINK_FOR_REMOVAL ("Ждёт ссылку для удаления товара");
 
-    private String UserState;
+    private final String UserState;
 
 
     UserState(String UserState) {

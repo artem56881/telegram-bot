@@ -1,10 +1,10 @@
-package org.example.commands;
+package com.github.ArtemAndrew.PriceMonitoringBot.commands;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.example.config.DatabaseConnection;
+import com.github.ArtemAndrew.PriceMonitoringBot.config.DatabaseConnection;
 
 public class RemoveCommand {
     // SQL-запросы

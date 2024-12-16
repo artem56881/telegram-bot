@@ -1,4 +1,4 @@
-package org.example.entity;
+package com.github.ArtemAndrew.PriceMonitoringBot.entity;
 
 import java.util.Objects;
 

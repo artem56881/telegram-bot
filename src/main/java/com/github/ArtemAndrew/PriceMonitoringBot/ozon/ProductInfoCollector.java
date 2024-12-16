@@ -1,4 +1,4 @@
-package org.example.ozon;
+package com.github.ArtemAndrew.PriceMonitoringBot.ozon;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

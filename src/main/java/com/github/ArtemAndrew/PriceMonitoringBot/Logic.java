@@ -1,4 +1,4 @@
-package org.example;
+package com.github.ArtemAndrew.PriceMonitoringBot;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -6,16 +6,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.example.entity.Button;
-import org.example.entity.Message;
-import org.example.entity.UserState;
-import org.example.commands.AddCommand;
-import org.example.commands.ListCommand;
-import org.example.commands.RemoveCommand;
-import org.example.services.UserDatabaseService;
-import org.example.services.NotificationService;
-import org.example.ozon.ProductInfoCollector;
-import org.example.ozon.FetchHtml;
+import com.github.ArtemAndrew.PriceMonitoringBot.entity.Button;
+import com.github.ArtemAndrew.PriceMonitoringBot.entity.Message;
+import com.github.ArtemAndrew.PriceMonitoringBot.entity.UserState;
+import com.github.ArtemAndrew.PriceMonitoringBot.commands.AddCommand;
+import com.github.ArtemAndrew.PriceMonitoringBot.commands.ListCommand;
+import com.github.ArtemAndrew.PriceMonitoringBot.commands.RemoveCommand;
+import com.github.ArtemAndrew.PriceMonitoringBot.services.UserDatabaseService;
+import com.github.ArtemAndrew.PriceMonitoringBot.services.NotificationService;
+import com.github.ArtemAndrew.PriceMonitoringBot.ozon.ProductInfoCollector;
+import com.github.ArtemAndrew.PriceMonitoringBot.ozon.FetchHtml;
 
 import java.util.HashMap;
 import java.util.List;

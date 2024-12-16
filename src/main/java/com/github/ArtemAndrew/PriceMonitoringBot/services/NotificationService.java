@@ -1,15 +1,12 @@
-package org.example.services;
+package com.github.ArtemAndrew.PriceMonitoringBot.services;
 
-import org.example.commands.AddCommand;
+import com.github.ArtemAndrew.PriceMonitoringBot.commands.AddCommand;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.example.ozon.ProductInfoCollector;
-import org.example.ozon.FetchHtml;
 
 public class NotificationService {
 

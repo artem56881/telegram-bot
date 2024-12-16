@@ -1,7 +1,7 @@
-package org.example;
+package com.github.ArtemAndrew.PriceMonitoringBot;
 
-import org.example.entity.Button;
-import org.example.entity.Message;
+import com.github.ArtemAndrew.PriceMonitoringBot.entity.Button;
+import com.github.ArtemAndrew.PriceMonitoringBot.entity.Message;
 import org.jetbrains.annotations.NotNull;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;

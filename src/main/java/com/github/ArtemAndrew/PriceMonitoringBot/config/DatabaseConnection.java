@@ -1,4 +1,4 @@
-package org.example.config;
+package com.github.ArtemAndrew.PriceMonitoringBot.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

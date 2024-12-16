@@ -1,6 +1,6 @@
-package org.example;
+package com.github.ArtemAndrew.PriceMonitoringBot;
 
-import org.example.config.DatabaseConnection;
+import com.github.ArtemAndrew.PriceMonitoringBot.config.DatabaseConnection;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;

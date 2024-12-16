@@ -1,6 +1,6 @@
-package org.example.commands;
+package com.github.ArtemAndrew.PriceMonitoringBot.commands;
 
-import org.example.config.DatabaseConnection;
+import com.github.ArtemAndrew.PriceMonitoringBot.config.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

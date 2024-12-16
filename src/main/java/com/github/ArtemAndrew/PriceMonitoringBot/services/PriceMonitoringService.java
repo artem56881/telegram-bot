@@ -1,8 +1,8 @@
-package org.example.services;
+package com.github.ArtemAndrew.PriceMonitoringBot.services;
 
-import org.example.commands.AddCommand;
-import org.example.ozon.ProductInfoCollector;
-import org.example.ozon.FetchHtml;
+import com.github.ArtemAndrew.PriceMonitoringBot.commands.AddCommand;
+import com.github.ArtemAndrew.PriceMonitoringBot.ozon.ProductInfoCollector;
+import com.github.ArtemAndrew.PriceMonitoringBot.ozon.FetchHtml;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class PriceMonitoringService {
 //                    addCommand.updateProductPrice(productUrl, updatedPrice);
 //
 //                    // Обновление данных в коллекции для использования в дальнейшем
-//                    product.put("current_price", updatedPrice;/////////////////////////////////TEST COMMENT
+//                    product.put("current_price", updatedPrice;
 //                    product.put("price_dropped", updatedPrice <= desiredPrice); // Флаг снижения цены
 //                }
             }
