@@ -121,4 +121,24 @@ public class AddCommand {
             }
         }
     }
+
+    public boolean isProductExists(Long productId) {
+        String CHECK_PRODUCT_EXISTS_SQL = "SELECT COUNT(*) FROM products WHERE id = ?";
+
+        try (Connection connection = DatabaseConnection.connect();
+             PreparedStatement preparedStatement = connection.prepareStatement(CHECK_PRODUCT_EXISTS_SQL)) {
+
+            preparedStatement.setLong(1, productId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
+
 }

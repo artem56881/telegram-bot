@@ -8,16 +8,12 @@ import com.github.ArtemAndrew.PriceMonitoringBot.config.DatabaseConnection;
 
 public class RemoveCommand {
     // SQL-запросы
-    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND product_id = ?";
+    private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND id = ?";
 
     public String execute(String userId, Long productId) {
         try {
-            if (productId != null) {
-                deleteProductFromDatabase(userId, productId);
-                return "Товар успешно удален из базы данных.";
-            } else {
-                return "Товар с указанной ссылкой не найден.";
-            }
+            deleteProductFromDatabase(userId, productId);
+            return "Товар успешно удален из базы данных.";
         } catch (SQLException e) {
             e.printStackTrace();
             return "Ошибка при удалении товара из базы данных: " + e.getMessage();

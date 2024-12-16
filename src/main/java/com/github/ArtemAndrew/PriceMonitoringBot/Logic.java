@@ -88,12 +88,11 @@ public class Logic {
 
         AddCommand addCommand = new AddCommand();
         if (UserState.AWAITING_PRODUCT_LINK.getUserState().equals(userStates.get(userId))) {
-            if (!isValidUrl(inputMessage)) { //проверка валидности ссылки
+            if (isInvalidUrl(inputMessage)) { //проверка валидности ссылки
                 userStates.put(userId, default_state); // Сбрасываем состояние пользователя
                 List<Button> buttons = List.of(
                         new Button("/add", "/add"));
                 return new Message("Некоректная ссылка, нажмите /add чтобы попробовать снова", buttons);
-
             }
             Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
 
@@ -108,32 +107,26 @@ public class Logic {
         }
 
         if (inputMessage.equals("/remove")) {
-            String remove_link = UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState();
-            userStates.put(userId, remove_link);
-            return new Message("Введите ссылку на товар, который хотите удалить:");
+            userStates.put(userId, UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState());
+            ListCommand listCommand = new ListCommand();
+            String result = listCommand.execute(Long.toString(userId));
+            return new Message(result + "\n \nВведите ID товара который вы хотите удалить.");
         }
 
-        if (UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState().equals(userStates.get(userId))) {
-            if (isValidUrl(inputMessage)) {
-                // Извлечение ID товара из ссылки.
-                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
-
-                String productId = productInfo.get("item_id");
-
-                if (productId != null) {
-                    RemoveCommand removeCommand = new RemoveCommand();
-                    //удаляем товар по ID
-                    String result = removeCommand.execute(Long.toString(userId), Long.valueOf(productId));
-
-                    // Сбрасываем состояние пользователя
-                    userStates.put(userId, UserState.DEFAULT.getUserState());
-                    return new Message(result);
-                } else {
-                    return new Message("Не удалось найти товар по указанной ссылке.");
-                }
-            } else {
-                return new Message("Пожалуйста, введите корректную ссылку на товар.");
+        if (UserState.AWAITING_PRODUCT_LINK_FOR_REMOVAL.getUserState().equals(userStates.get(userId))) { //Ожидаем ID товара для удаления от пользователя.
+            if (!addCommand.isProductExists(Long.valueOf(inputMessage))){
+                userStates.put(userId, default_state); // Сбрасываем состояние пользователя
+                List<Button> buttons = List.of(
+                        new Button("/remove", "/remove"));
+                return new Message("Товара с таким ID не существует. Нажмите /remove чтобы попробовать снова.", buttons);
             }
+            RemoveCommand removeCommand = new RemoveCommand();
+            //удаляем товар по ID
+            String result = removeCommand.execute(Long.toString(userId), Long.valueOf(inputMessage)); //
+
+            // Сбрасываем состояние пользователя
+            userStates.put(userId, UserState.DEFAULT.getUserState());
+            return new Message(result);
         }
 
         if (inputMessage.equals("/list")) {
@@ -151,8 +144,8 @@ public class Logic {
 
         if (UserState.AWAITING_PRODUCT_LINK_FOR_CHECK.getUserState().equals(userStates.get(userId))) {
             List<Button> buttons = List.of(
-                    new Button("Проверить цену", "/check_price"));
-            if (!isValidUrl(inputMessage)) { //проверка валидности ссылки
+                    new Button("/check_price", "/check_price"));
+            if (isInvalidUrl(inputMessage)) { //проверка валидности ссылки
                 userStates.put(userId, default_state); // Сбрасываем состояние пользователя
                 return new Message("Некоректная ссылка на товар, Нажмите /check_price чтобы попробовать снова", buttons);
 
@@ -182,7 +175,7 @@ public class Logic {
         return new Message("Неизвестная команда. Используйте /help для списка доступных команд.");
     }
 
-    private boolean isValidUrl(String url) {
+    private boolean isInvalidUrl(String url) {
         String regex = "https?://\\S+";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(url);
