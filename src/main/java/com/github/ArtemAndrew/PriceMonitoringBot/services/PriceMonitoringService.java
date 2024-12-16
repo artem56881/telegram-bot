@@ -26,11 +26,11 @@ public class PriceMonitoringService {
 
             for (Map<String, Object> product : trackedProducts) {
                 Long productId = (Long) product.get("product_id");
-                String productName = (String) product.get("name");
+                String productLink = (String) product.get("product_link");
                 int desiredPrice = (int) product.get("desired_price");
                 int currentPrice = (int) product.get("price");
 
-                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(productName));
+                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(productLink));//здесь должна быть ссылко.
                 int updatedPrice = Integer.parseInt(productInfo.get("base_price"));
 
                 if (updatedPrice != currentPrice) {

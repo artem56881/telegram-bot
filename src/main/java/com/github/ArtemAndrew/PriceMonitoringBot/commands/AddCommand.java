@@ -13,18 +13,18 @@ import java.util.Map;
 
 public class AddCommand {
 
-    private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (user_id, product_id, name, price) VALUES (?, ?, ?, ?)";
+    private static final String INSERT_PRODUCT_SQL = "INSERT INTO products (user_id, product_id, name, price, desired_price, product_link) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String CHECK_PRODUCT_SQL = "SELECT COUNT(*) FROM products WHERE user_id = ? AND product_id = ?";
-    private static final String SELECT_TRACKED_PRODUCTS_SQL = "SELECT user_id, product_id, name, price FROM products WHERE user_id = ?";
+    private static final String SELECT_TRACKED_PRODUCTS_SQL = "SELECT user_id, product_id, name, price, desired_price FROM products WHERE user_id = ?";
     private static final String UPDATE_PRODUCT_PRICE_SQL = "UPDATE products SET price = ? WHERE product_id = ?";
 
-    public String execute(String userId, Long productId, String productName, int price) {
+    public String execute(String userId, Long productId, String productName, int price, String link) {
         try {
             if (isProductInDatabase(userId, productId)) {
                 return "Товар уже добавлен в отслеживаемые";
             }
 
-            addProductToDatabase(userId, productId, productName, price);
+            addProductToDatabase(userId, productId, productName, price, link);
             return "Товар успешно добавлен для отслеживания";
         } catch (SQLException e) {
             return "Ошибка при добавлении товара в базу данных: " + e.getMessage();
@@ -46,7 +46,7 @@ public class AddCommand {
         return false;
     }
 
-    private void addProductToDatabase(String userId, Long productId, String productName, int price) throws SQLException {
+    private void addProductToDatabase(String userId, Long productId, String productName, int price, String link) throws SQLException {
         if (productName.length() > 50) {
             productName = productName.substring(0, 50);
         }
@@ -56,7 +56,9 @@ public class AddCommand {
             preparedStatement.setString(1, userId);
             preparedStatement.setLong(2, productId);
             preparedStatement.setString(3, productName);
-            preparedStatement.setInt(4, price); // Используем int для price
+            preparedStatement.setInt(4, price);
+            preparedStatement.setInt(5, price); // при добавлении desired_price будет равен price, но не будет обновляться периодически.
+            preparedStatement.setString(6, link);
 
             preparedStatement.executeUpdate();
             System.out.println("Товар добавлен в базу данных.");
@@ -76,7 +78,7 @@ public class AddCommand {
                     product.put("user_id", resultSet.getString("user_id"));
                     product.put("product_id", resultSet.getLong("product_id"));
                     product.put("name", resultSet.getString("name"));
-                    product.put("price", resultSet.getInt("price")); // Используем int для price
+                    product.put("price", resultSet.getInt("price"));
 
                     trackedProducts.add(product);
                 }
@@ -97,7 +99,9 @@ public class AddCommand {
                     product.put("user_id", resultSet.getString("user_id"));
                     product.put("product_id", resultSet.getLong("product_id"));
                     product.put("name", resultSet.getString("name"));
-                    product.put("price", resultSet.getInt("price")); // Используем int для price
+                    product.put("price", resultSet.getInt("price"));
+                    product.put("desired_price", resultSet.getInt("desired_price"));
+                    product.put("product_link", resultSet.getString("product_link"));
 
                     trackedProducts.add(product);
                 }

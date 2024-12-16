@@ -85,8 +85,8 @@ public class NotificationService {
         scheduler.scheduleAtFixedRate(
                 this::sendPeriodicNotifications,
                 0, // Задержка перед первым запуском (в секундах)
-                6, // Интервал между выполнениями (в часах)
-                TimeUnit.HOURS // Единица измерения времени
+                25, // Интервал между выполнениями (в часах)
+                TimeUnit.SECONDS // Единица измерения времени
         );
 
         System.out.println("Планировщик уведомлений успешно запущен.");
