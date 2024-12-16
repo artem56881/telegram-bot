@@ -15,8 +15,7 @@ public class Main {
 
         Logic logic = new Logic();
 
-//        DatabaseConnection databaseConnection = new DatabaseConnection();
-//        databaseConnection.createAllTable();
+        DatabaseConnection.createAllTables();
 
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);

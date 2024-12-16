@@ -5,7 +5,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
 public class DatabaseConnection {
     private static final String URL = "jdbc:postgresql://localhost:5432/telegrambot";
     private static final String USER = "postgres";
@@ -25,41 +24,35 @@ public class DatabaseConnection {
         return connection;
     }
 
-    public void createAllTable() {
+    public static void createAllTables() {
         String sql1 = """
                 CREATE TABLE IF NOT EXISTS Users (
-                id SERIAL PRIMARY KEY, 
-                username VARCHAR(50) NOT NULL 
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(50) NOT NULL
                 );""";
 
         String sql2 = """
                 CREATE TABLE IF NOT EXISTS products (
-                id SERIAL PRIMARY KEY, 
-                name VARCHAR(50) NOT NULL, 
-                price INTEGER NOT NULL
-                user_id VARCHAR(50) NOT NULL
-                product_id INTEGER NOT NULL
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50) NOT NULL,
+                price INTEGER NOT NULL,
+                user_id VARCHAR(50) NOT NULL,
+                product_id BIGINT NOT NULL
                 );""";
 
         String sql3 = """
                 CREATE TABLE IF NOT EXISTS Users_Products (
                 id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                product_id INTEGER NOT NULL
+                user_id VARCHAR(50) NOT NULL,
+                product_id BIGINT NOT NULL
                 );""";
 
-        try {
-            Connection conn = connect();
-            if (conn != null) {
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.executeUpdate(sql1);
-                    stmt.executeUpdate(sql2);
-                    stmt.executeUpdate(sql3);
-                    System.out.println("Таблицы успешно созданы или уже существуют.");
-                }
-            } else {
-                System.out.println("Не удалось создать таблицу: соединение с базой данных не установлено.");
-            }
+        try (Connection conn = connect();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql1);
+            stmt.executeUpdate(sql2);
+            stmt.executeUpdate(sql3);
+            System.out.println("Таблицы успешно созданы или уже существуют.");
         } catch (SQLException e) {
             System.out.println("Ошибка создания таблицы: " + e.getMessage());
         }

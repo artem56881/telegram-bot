@@ -10,7 +10,7 @@ public class RemoveCommand {
     // SQL-запросы
     private static final String DELETE_PRODUCT_SQL = "DELETE FROM products WHERE user_id = ? AND product_id = ?";
 
-    public String execute(Long userId, Long productId) {
+    public String execute(String userId, Long productId) {
         try {
             if (productId != null) {
                 deleteProductFromDatabase(userId, productId);
@@ -24,11 +24,11 @@ public class RemoveCommand {
         }
     }
 
-    private void deleteProductFromDatabase(Long userId, Long productId) throws SQLException {
+    private void deleteProductFromDatabase(String userId, Long productId) throws SQLException {
         try (Connection connection = DatabaseConnection.connect();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_PRODUCT_SQL)) {
 
-            preparedStatement.setLong(1, userId);
+            preparedStatement.setString(1, userId);
             preparedStatement.setLong(2, productId);
             int rowsAffected = preparedStatement.executeUpdate();
 

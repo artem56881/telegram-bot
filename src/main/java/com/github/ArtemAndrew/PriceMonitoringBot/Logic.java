@@ -123,7 +123,7 @@ public class Logic {
                 if (productId != null) {
                     RemoveCommand removeCommand = new RemoveCommand();
                     //удаляем товар по ID
-                    String result = removeCommand.execute(userId, Long.valueOf(productId));
+                    String result = removeCommand.execute(Long.toString(userId), Long.valueOf(productId));
 
                     // Сбрасываем состояние пользователя
                     userStates.put(userId, UserState.DEFAULT.getUserState());
