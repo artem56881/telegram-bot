@@ -179,7 +179,7 @@ public class Logic {
         String regex = "https?://\\S+";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(url);
-        return matcher.matches();
+        return !matcher.matches();
     }
 
     public void startPeriodicNotifications() {
