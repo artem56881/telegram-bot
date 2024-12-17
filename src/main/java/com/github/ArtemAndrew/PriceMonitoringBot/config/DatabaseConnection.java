@@ -37,7 +37,9 @@ public class DatabaseConnection {
                 name VARCHAR(50) NOT NULL,
                 price INTEGER NOT NULL,
                 user_id VARCHAR(50) NOT NULL,
-                product_id BIGINT NOT NULL
+                product_id BIGINT NOT NULL,
+                desired_price INTEGER NOT NULL,
+                product_link TEXT NOT NULL
                 );""";
 
         String sql3 = """

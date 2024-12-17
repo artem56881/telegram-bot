@@ -13,15 +13,18 @@ public class Main {
         String token = System.getenv("TOKEN");
         String name = System.getenv("NAME");
 
-        Logic logic = new Logic();
 
         DatabaseConnection.createAllTables();
 
+        Logic logic = new Logic();
+        MyTelegramBot tgBot = new MyTelegramBot(token, name, logic);
+        logic.setTelegranBot(tgBot);
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(new MyTelegramBot(token, name, logic));
+            botsApi.registerBot(tgBot);
         } catch (TelegramApiException _) {
             System.out.println("Error class Telegram exeption");
         }
+
     }
 }

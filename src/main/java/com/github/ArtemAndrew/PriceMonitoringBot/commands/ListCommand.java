@@ -48,7 +48,7 @@ public class ListCommand {
                 int productPrice = resultSet.getInt("price");
 
                 // Добавляем продукт в список
-                products.add("ID: " + productId + ", Название: " + productName + ", Цена: " + productPrice);
+                products.add("ID: " + productId + ", Название: " + productName + ", Цена: " + productPrice + "₽");
             }
         } catch (SQLException e) {
             throw new SQLException("Ошибка при получении списка товаров из БД: " + e.getMessage());

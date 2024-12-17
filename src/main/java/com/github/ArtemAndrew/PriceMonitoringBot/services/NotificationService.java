@@ -1,6 +1,9 @@
 package com.github.ArtemAndrew.PriceMonitoringBot.services;
 
 import com.github.ArtemAndrew.PriceMonitoringBot.commands.AddCommand;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import com.github.ArtemAndrew.PriceMonitoringBot.MyTelegramBot;
 
 import java.util.List;
 import java.util.Map;
@@ -9,11 +12,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class NotificationService {
-
+    private MyTelegramBot tgBot;
     private final AddCommand addCommand;
 
-    public NotificationService(AddCommand addCommand) {
+    public NotificationService(AddCommand addCommand, MyTelegramBot tgBot) {
         this.addCommand = addCommand;
+        this.tgBot = tgBot;
 
         startNotificationScheduler();
     }
@@ -27,7 +31,7 @@ public class NotificationService {
             List<Map<String, Object>> trackedProducts = addCommand.getTrackedProducts(testUsrid);
 
             for (Map<String, Object> product : trackedProducts) {
-                long userId = (long) product.get("user_id");
+                String userId = (String) product.get("user_id");
                 String productName = (String) product.get("product_name");
                 int currentPrice = (int) product.get("current_price");
 
@@ -55,20 +59,25 @@ public class NotificationService {
             List<Map<String, Object>> updatedProducts = priceMonitoringService.checkAndUpdatePrices();
 
             for (Map<String, Object> product : updatedProducts) {
-                boolean priceDropped = (boolean) product.get("price_dropped");
+                int currentPrice = (int) product.get("current_price");
+//                int desiredPrice = (int) product.get("desired_price");
+                int updatedPrice = (int) product.get("price");
+                String productName = (String) product.get("name");
+                String notificationMessage;
+                String userId = (String) product.get("user_id");
+                if (currentPrice < updatedPrice) {
 
-                if (priceDropped) {
-                    long userId = (long) product.get("user_id");
-                    String productName = (String) product.get("product_name");
-                    int currentPrice = (int) product.get("current_price");
-                    int desiredPrice = (int) product.get("desired_price");
-
-                    String notificationMessage = String.format(
-                            "🔔 Отличные новости! Цена на товар '%s' снизилась до %d₽ (ваша целевая цена: %d₽).",
-                            productName, currentPrice, desiredPrice
-                    );
-                    sendMessageToUser(userId, notificationMessage);
+                    notificationMessage = "🔔 Отличные новости! Цена товара " + productName + "снизилась до " + updatedPrice + "!";
+                } else if (currentPrice == updatedPrice) {
+//                    System.out.println(updatedPrice);
+//                    System.out.println(currentPrice);
+                    notificationMessage = "Цена товара " + productName + " не поменялась.";
                 }
+                else {
+                    notificationMessage = "Цена товара " + productName + " повысилась!.";
+
+                }
+                sendMessageToUser(userId, notificationMessage);
             }
         } catch (Exception e) {
             System.err.println("Ошибка при проверке цен и отправке уведомлений: " + e.getMessage());
@@ -83,17 +92,19 @@ public class NotificationService {
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
         scheduler.scheduleAtFixedRate(
-                this::sendPeriodicNotifications,
+                this::checkPriceUpdatesAndNotify,
                 0, // Задержка перед первым запуском (в секундах)
-                6, // Интервал между выполнениями (в часах)
-                TimeUnit.HOURS // Единица измерения времени
+                15, // Интервал между выполнениями (в часах)
+                TimeUnit.SECONDS // Единица измерения времени
         );
 
         System.out.println("Планировщик уведомлений успешно запущен.");
     }
 
-    private void sendMessageToUser(long userId, String message) {
-        System.out.printf("Уведомление для пользователя %d: %s%n", userId, message);
+    private void sendMessageToUser(String userId, String message) {
+        System.out.printf("Уведомление для пользователя" + userId + message);
+        //Добавить отправку самого сообщения в телеграм.
+        tgBot.sendNotification(userId, message);
     }
 
 

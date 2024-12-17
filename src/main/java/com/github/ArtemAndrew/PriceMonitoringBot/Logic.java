@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Logic {
-
+    private MyTelegramBot tgBot = null;
     private final Map<Long, String> userStates = new HashMap<>();
     private final Map<String, Message> commandMap = new HashMap<>();
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -54,9 +54,13 @@ public class Logic {
         commandMap.put("/tst", new Message("FGDFG"));
     }
 
-    public Message handleStartCommand(long userId, String userName) {
-        UserDatabaseService userDatabaseService = new UserDatabaseService();
-        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
+    public void setTelegranBot(MyTelegramBot bot){
+        this.tgBot = bot;
+    }
+
+    public Message handleStartCommand() {
+//        UserDatabaseService userDatabaseService = new UserDatabaseService();
+//        boolean userAdded = userDatabaseService.addUserToDatabase(userId, userName);
         List<Button> buttons = List.of(
                 new Button("Добавить товар для отслеживания", "/add"),
                 new Button("Показать список отслеживаемых товаров", "/list"),
@@ -65,11 +69,11 @@ public class Logic {
                 new Button("Проверить цену товара", "/check_price")
         );
 
-        if (userAdded) {
-            return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
-        } else {
-            return new Message("Мы вас уже запомнили", buttons);
-        }
+        return new Message("Спасибо, что пользуйтесь нашим ботом!", buttons);
+//        if (userAdded) {
+//        } else {
+//            return new Message("Мы вас уже запомнили", buttons);
+//        }
     }
 
     public Message processMessage(String inputMessage, long userId) {
@@ -77,7 +81,7 @@ public class Logic {
         if (inputMessage.equals("/start")) {
             userStates.put(userId, default_state); // Сбрасываем состояние пользователя
             startPeriodicNotifications();
-            return handleStartCommand(userId, "default username");
+            return handleStartCommand();
         }
 
         if (inputMessage.equals("/add")) {
@@ -88,22 +92,26 @@ public class Logic {
 
         AddCommand addCommand = new AddCommand();
         if (UserState.AWAITING_PRODUCT_LINK.getUserState().equals(userStates.get(userId))) {
+            List<Button> buttons = List.of(
+                    new Button("/add", "/add"));
             if (isInvalidUrl(inputMessage)) { //проверка валидности ссылки
                 userStates.put(userId, default_state); // Сбрасываем состояние пользователя
-                List<Button> buttons = List.of(
-                        new Button("/add", "/add"));
                 return new Message("Некоректная ссылка, нажмите /add чтобы попробовать снова", buttons);
             }
-            Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
-
-            Long productId = Long.valueOf(productInfo.get("item_id"));
-            String productName = productInfo.get("item_name");
-            int productPrice = Integer.parseInt(productInfo.get("base_price"));
-
-            String result = addCommand.execute(Long.toString(userId), productId, productName, productPrice);
-
-            userStates.put(userId, UserState.DEFAULT.getUserState());
-            return new Message(result);
+            try {
+                Map<String, String> productInfo = ProductInfoCollector.collectProductInfo(FetchHtml.ExtarctHtml(inputMessage));
+                Long productId = Long.valueOf(productInfo.get("item_id"));
+                String productName = productInfo.get("item_name");
+                int productPrice = Integer.parseInt(productInfo.get("base_price"));
+                String result = addCommand.execute(Long.toString(userId), productId, productName, productPrice, inputMessage);
+                userStates.put(userId, UserState.DEFAULT.getUserState());
+                return new Message(result);
+            }
+            catch (Exception e) {
+                System.err.println("Ошибка парсинга сайта: " + e.getMessage());
+                userStates.put(userId, default_state); // Сбрасываем состояние пользователя
+                return new Message("Не удалось получить доступ к товару, проверьте правильность ссылки и нажмите /add чтобы попробовать снова", buttons);
+            }
         }
 
         if (inputMessage.equals("/remove")) {
@@ -189,7 +197,7 @@ public class Logic {
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 AddCommand add = new AddCommand();
-                NotificationService notify = new NotificationService(add);
+                NotificationService notify = new NotificationService(add, tgBot);
                 notify.checkPriceUpdatesAndNotify();
             } catch (Exception e) {
                 System.err.println("Ошибка при отправке периодических уведомлений: " + e.getMessage());
