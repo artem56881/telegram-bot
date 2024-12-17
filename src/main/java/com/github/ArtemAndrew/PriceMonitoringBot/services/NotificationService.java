@@ -1,8 +1,6 @@
 package com.github.ArtemAndrew.PriceMonitoringBot.services;
 
 import com.github.ArtemAndrew.PriceMonitoringBot.commands.AddCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.github.ArtemAndrew.PriceMonitoringBot.MyTelegramBot;
 
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class NotificationService {
-    private MyTelegramBot tgBot;
+    private final MyTelegramBot tgBot;
     private final AddCommand addCommand;
 
     public NotificationService(AddCommand addCommand, MyTelegramBot tgBot) {
@@ -66,18 +64,16 @@ public class NotificationService {
                 String notificationMessage;
                 String userId = (String) product.get("user_id");
                 if (currentPrice < updatedPrice) {
-
-                    notificationMessage = "🔔 Отличные новости! Цена товара " + productName + "снизилась до " + updatedPrice + "!";
-                } else if (currentPrice == updatedPrice) {
-//                    System.out.println(updatedPrice);
-//                    System.out.println(currentPrice);
-                    notificationMessage = "Цена товара " + productName + " не поменялась.";
+                    notificationMessage = "🔔 Отличные новости! Цена товара " + productName + " снизилась до " + updatedPrice + "!";
+                    sendMessageToUser(userId, notificationMessage);
                 }
-                else {
+//                else if (currentPrice == updatedPrice) {
+//                    notificationMessage = "Цена товара " + productName + " не поменялась.";
+//                }
+                else if (currentPrice > updatedPrice) {
                     notificationMessage = "Цена товара " + productName + " повысилась!.";
-
+                    sendMessageToUser(userId, notificationMessage);
                 }
-                sendMessageToUser(userId, notificationMessage);
             }
         } catch (Exception e) {
             System.err.println("Ошибка при проверке цен и отправке уведомлений: " + e.getMessage());
@@ -103,9 +99,7 @@ public class NotificationService {
 
     private void sendMessageToUser(String userId, String message) {
         System.out.printf("Уведомление для пользователя" + userId + message);
-        //Добавить отправку самого сообщения в телеграм.
         tgBot.sendNotification(userId, message);
     }
-
 
 }
